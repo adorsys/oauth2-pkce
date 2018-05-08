@@ -1,6 +1,5 @@
 package de.adorsys.oauth2.pkce.service;
 
-import de.adorsys.oauth2.pkce.context.Oauth2PkceContext;
 import de.adorsys.oauth2.pkce.PkceProperties;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
@@ -13,20 +12,17 @@ import java.util.Date;
 public class PkceTokenRequestService {
 
     private final RestTemplate restTemplate;
-    private final Oauth2PkceContext oauth2PkceContext;
     private final PkceProperties pkceProperties;
 
     public PkceTokenRequestService(
             RestTemplate restTemplate,
-            Oauth2PkceContext oauth2PkceContext,
             PkceProperties pkceProperties
     ) {
         this.restTemplate = restTemplate;
-        this.oauth2PkceContext = oauth2PkceContext;
         this.pkceProperties = pkceProperties;
     }
 
-    public TokenResponse requestToken(String code) {
+    public TokenResponse requestToken(String code, String codeVerifier) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", pkceProperties.getAuthorizationHeader());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -35,7 +31,7 @@ public class PkceTokenRequestService {
         body.add("grant_type", "authorization_code");
         body.add("redirect_uri", pkceProperties.getRedirectUri());
         body.add("code", code);
-        body.add("code_verifier", oauth2PkceContext.getCodeVerifier().getValue());
+        body.add("code_verifier", codeVerifier);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 

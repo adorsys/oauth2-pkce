@@ -1,36 +1,69 @@
 package de.adorsys.oauth2.pkce.service;
 
-import de.adorsys.oauth2.pkce.context.Oauth2PkceContext;
 import de.adorsys.oauth2.pkce.PkceProperties;
+import de.adorsys.oauth2.pkce.basetypes.CodeChallenge;
+import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
+import de.adorsys.oauth2.pkce.basetypes.Nonce;
+import de.adorsys.oauth2.pkce.basetypes.State;
+import de.adorsys.oauth2.pkce.context.Oauth2PkceFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 public class LoginRedirectService {
 
     private final PkceProperties pkceProperties;
-    private final Oauth2PkceContext context;
+    private final Oauth2PkceFactory oauth2PkceFactory;
 
-    public LoginRedirectService(PkceProperties pkceProperties, Oauth2PkceContext context) {
+    public LoginRedirectService(PkceProperties pkceProperties, Oauth2PkceFactory oauth2PkceFactory) {
         this.pkceProperties = pkceProperties;
-        this.context = context;
+        this.oauth2PkceFactory = oauth2PkceFactory;
     }
 
-    public String getRedirectUrl() {
+    public LoginRedirect getRedirect() {
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromHttpUrl(pkceProperties.getUserAuthorizationUri());
 
         builder.queryParam("client_id", pkceProperties.getClientId());
         builder.queryParam("scope", pkceProperties.getScope());
 
-        builder.queryParam("code_challenge", context.getCodeChallenge().getValue());
+        CodeVerifier codeVerifier = oauth2PkceFactory.generateCodeVerifier();
+        CodeChallenge codeChallenge = oauth2PkceFactory.createCodeChallenge(codeVerifier);
+        builder.queryParam("code_challenge", codeChallenge.getValue());
         builder.queryParam("code_challenge_method", pkceProperties.getCodeChallengeMethod());
 
-        builder.queryParam("nonce", context.getNonce().getValue());
+        Nonce nonce = oauth2PkceFactory.generateNonce();
+        builder.queryParam("nonce", nonce.getValue());
 
         builder.queryParam("response_type", pkceProperties.getResponseType());
         builder.queryParam("redirect_uri", pkceProperties.getRedirectUri());
 
-        builder.queryParam("state", context.getState().getValue());
+        State state = oauth2PkceFactory.generateState();
+        builder.queryParam("state", state.getValue());
 
-        return builder.build().toUriString();
+        LoginRedirect loginRedirect = new LoginRedirect();
+        loginRedirect.setCodeVerifier(codeVerifier);
+        loginRedirect.setRedirectUrl(builder.build().toUriString());
+
+        return loginRedirect;
+    }
+
+    public static class LoginRedirect {
+        private CodeVerifier codeVerifier;
+        private String redirectUrl;
+
+        public CodeVerifier getCodeVerifier() {
+            return codeVerifier;
+        }
+
+        public void setCodeVerifier(CodeVerifier codeVerifier) {
+            this.codeVerifier = codeVerifier;
+        }
+
+        public String getRedirectUrl() {
+            return redirectUrl;
+        }
+
+        public void setRedirectUrl(String redirectUrl) {
+            this.redirectUrl = redirectUrl;
+        }
     }
 }

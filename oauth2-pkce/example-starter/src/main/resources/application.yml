@@ -13,7 +13,6 @@ pkce:
   access-token-uri: https://my.idp/token
   user-authorization-uri: https://my.idp/authorize
   user-info-uri: https://my.idp/userinfo
-  token-name: oauth_token
   scope: openid+profile
   redirect-uri: http://localhost/token
   code-challenge-method: S256
