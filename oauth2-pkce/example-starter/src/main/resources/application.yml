@@ -19,7 +19,7 @@ pkce:
   code-challenge-method: S256
   response-type: code+id_token
   cookie-name: bearer_token
-  secure-cookie: false
+  secure-cookie: true
 
 server:
   port: 8888

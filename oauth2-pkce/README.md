@@ -14,5 +14,5 @@ mvn clean package
 ## Run it
 
 ```
-java -jar ./starter/target/starter.jar # to run the spring-oauth2-example
+java -jar ./example-starter/target/example-starter.jar # to run the spring-oauth2-example
 ```
