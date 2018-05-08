@@ -1,0 +1,29 @@
+version: '3.1'
+services:
+  backend:
+    build: ./oauth2-pkce/example-starter
+    image: local/spring-oauth2:latest
+    environment:
+      - SPRING_APPLICATION_JSON={"pkce":{"authorization-header":"Basic dXNlcjpwYXNzd29yZA==","client-id":"8eaf2f91-c9cb-4567-8cb6-84d874de48ab","client-secret":"my_super_secret_client_secret","access-token-uri":"https://my.idp/token","user-authorization-uri":"https://my.idp/authorize","user-info-uri":"https://my.idp/userinfo","token-name":"oauth_token","scope":"openid+profile","redirect-uri":"http://localhost/token","code-challenge-method":"S256","response-type":"code+id_token","cookie-name":"bearer_token","secure-cookie":false}}
+    ports:
+    - "8888:8888"
+    networks:
+    - my_network
+  frontend:
+    build:
+      context: ./angular-oauth2
+      dockerfile: dev.Dockerfile
+    image: local/angular-oauth2:latest
+    volumes:
+      - ./angular-oauth2:/opt/src
+      - ./.docker-build/node_modules:/opt/src/node_modules
+    depends_on:
+    - backend
+    links:
+    - backend
+    ports:
+    - "80:4200"
+    networks:
+    - my_network
+networks:
+  my_network:

@@ -1,0 +1,19 @@
+version: '3.1'
+services:
+  build-backend:
+    build:
+      context: ./oauth2-pkce
+      dockerfile: build.Dockerfile
+    image: local/build__oauth2_backend:latest
+    volumes:
+      - ./oauth2-pkce:/opt/src
+      - ./.docker-build/.m2:/root/.m2
+  build-frontend:
+    build:
+      context: ./angular-oauth2
+      dockerfile: build.Dockerfile
+    image: local/build__oauth2_frontend:latest
+    volumes:
+      - ./angular-oauth2:/opt/src
+      - ./.docker-build/node_modules:/opt/src/node_modules
+

@@ -1,1 +1,6 @@
+target/
+.idea/
+*.iml
+.docker/
+.docker-build/
 .DS_Store

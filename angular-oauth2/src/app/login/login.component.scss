@@ -1,0 +1,19 @@
+.login_choice_container {
+  &--authenticated {
+    display: none;
+  }
+
+  &--unauthenticated {
+    display: block;
+  }
+}
+
+.login_user_container {
+  &--authenticated {
+    display: block;
+  }
+
+  &--unauthenticated {
+    display: none;
+  }
+}

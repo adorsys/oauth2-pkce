@@ -1,0 +1,26 @@
+{
+  "/login/datev": {
+    "target": "http://localhost:8888",
+    "secure": false
+  },
+  "/login/keycloak": {
+    "target": "http://localhost:8888",
+    "secure": false
+  },
+  "/oauth/pkce": {
+    "target": "http://localhost:8888",
+    "secure": false
+  },
+  "/user": {
+    "target": "http://localhost:8888",
+    "secure": false
+  },
+  "/me": {
+    "target": "http://localhost:8888",
+    "secure": false
+  },
+  "/accesstoken": {
+    "target": "http://localhost:8888",
+    "secure": false
+  }
+}

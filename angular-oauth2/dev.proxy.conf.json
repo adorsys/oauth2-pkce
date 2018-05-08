@@ -1,0 +1,22 @@
+{
+  "/login/datev": {
+    "target": "http://backend:8888",
+    "secure": false
+  },
+  "/login/keycloak": {
+    "target": "http://backend:8888",
+    "secure": false
+  },
+  "/oauth/pkce": {
+    "target": "http://backend:8888",
+    "secure": false
+  },
+  "/user": {
+    "target": "http://backend:8888",
+    "secure": false
+  },
+  "/me": {
+    "target": "http://backend:8888",
+    "secure": false
+  }
+}

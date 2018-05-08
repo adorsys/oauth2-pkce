@@ -1,0 +1,27 @@
+<h1>Login</h1>
+<div
+  class="login_choice_container"
+  [class.login_choice_container--authenticated]="authenticated"
+  [class.login_choice_container--unauthenticated]="unauthenticated"
+>
+  <div>
+    <!--With Datev IDP: <a [href]="backendUrl + '/login/datev?state=QovdM-QGwUdBR-C5Epdvils5zDM'">click here</a>-->
+    <!--With Datev IDP: <a [href]="backendUrl + '/login/datev'">click here</a>-->
+    With Datev IDP: <a [href]="loginUrl">click here</a>
+    <!--With Datev IDP: <a href="#" (click)="login()">click here</a>-->
+  </div >
+  authenticated: {{authenticated}}
+  <div>
+    With local Keycloak: <a [href]="backendUrl + '/login/keycloak'">click here</a>
+  </div>
+</div>
+<div
+  class="login_user_container"
+  [class.login_user_container--authenticated]="authenticated"
+  [class.login_user_container--unauthenticated]="unauthenticated"
+>
+  Logged in as: <span id="user">{{user | json}}</span>
+  <div>
+    <button (click)="logout()">Logout</button>
+  </div>
+</div>
