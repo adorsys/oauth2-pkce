@@ -4,3 +4,4 @@ target/
 .docker/
 .docker-build/
 .DS_Store
+pom.xml.versionsBackup
