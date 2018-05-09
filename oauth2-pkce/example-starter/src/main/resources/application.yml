@@ -7,7 +7,6 @@ security:
       auto-approve-scopes: '.*'
 
 pkce:
-  authorization-header: Basic dXNlcjpwYXNzd29yZA==
   client-id: 8eaf2f91-c9cb-4567-8cb6-84d874de48ab
   client-secret: my_super_secret_client_secret
   access-token-uri: https://my.idp/token

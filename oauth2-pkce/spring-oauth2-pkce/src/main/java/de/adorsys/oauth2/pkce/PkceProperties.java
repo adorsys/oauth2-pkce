@@ -8,7 +8,6 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "pkce")
 @Validated
 public class PkceProperties {
-    private String authorizationHeader;
     private String clientId;
     private String clientSecret;
     private String accessTokenUri;
@@ -19,14 +18,6 @@ public class PkceProperties {
     private String responseType;
     private String cookieName;
     private Boolean secureCookie = true;
-
-    public String getAuthorizationHeader() {
-        return authorizationHeader;
-    }
-
-    public void setAuthorizationHeader(String authorizationHeader) {
-        this.authorizationHeader = authorizationHeader;
-    }
 
     public String getClientId() {
         return clientId;

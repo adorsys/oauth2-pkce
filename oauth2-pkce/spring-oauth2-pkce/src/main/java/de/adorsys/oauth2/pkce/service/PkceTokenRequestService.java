@@ -7,9 +7,13 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 
 public class PkceTokenRequestService {
+
+    private static final Base64.Encoder BASE_64 = Base64.getEncoder();
 
     private final RestTemplate restTemplate;
     private final PkceProperties pkceProperties;
@@ -24,7 +28,7 @@ public class PkceTokenRequestService {
 
     public TokenResponse requestToken(String code, String codeVerifier, String redirectUri) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", pkceProperties.getAuthorizationHeader());
+        headers.add("Authorization", "Basic " + buildAuthorizationHeader());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> body= new LinkedMultiValueMap<>();
@@ -43,6 +47,15 @@ public class PkceTokenRequestService {
         );
 
         return exchange.getBody();
+    }
+
+    private String buildAuthorizationHeader() {
+        String clientId = pkceProperties.getClientId();
+        String clientSecret = pkceProperties.getClientSecret();
+
+        String userPassword = clientId + ":" + clientSecret;
+
+        return new String(BASE_64.encode(userPassword.getBytes()));
     }
 
     public static class TokenResponse {
