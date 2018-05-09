@@ -3,6 +3,7 @@ import {UserService} from "../user/user.service";
 import {User} from "../user/user";
 import {environment} from "../../environments/environment";
 import {AuthenticationService} from "../auth/authentication.service";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'app-login',
@@ -15,11 +16,14 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
+    private route: ActivatedRoute
   ) {
   }
 
   ngOnInit() {
+    console.log("login component");
+
     if(this.authenticationService.isAuthenticated) {
       this.userService.getUser().subscribe(
         user => {
@@ -27,6 +31,11 @@ export class LoginComponent implements OnInit {
           console.log(user)
         }
       );
+    } else {
+      let code = this.route.queryParams['code'];
+      if(code) {
+        this.authenticationService.exchangeToken(code.value);
+      }
     }
   }
 
@@ -47,7 +56,7 @@ export class LoginComponent implements OnInit {
   }
 
   public get loginUrl() {
-    return `${environment.backendUrl}${environment.loginEndpoint}`;
+    return `${environment.backendUrl}${environment.loginEndpoint}?redirect_uri=${environment.redirectUri}`;
   }
 
   public login(): void {

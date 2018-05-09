@@ -5,20 +5,19 @@ import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
 import de.adorsys.oauth2.pkce.mapping.BearerTokenMapper;
 import de.adorsys.oauth2.pkce.service.LoginRedirectService;
 import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 @RestController("/oauth/pkce")
 public class PkceRestController {
 
     private static final String CODE_VERIFIER_COOKIE_NAME = "code_verifier";
+    private static final String REDIRECT_URI_COOKIE_NAME = "redirect_uri";
+
     private final PkceTokenRequestService pkceTokenRequestService;
     private final LoginRedirectService loginRedirectService;
     private final BearerTokenMapper mapper;
@@ -37,31 +36,40 @@ public class PkceRestController {
         this.pkceProperties = pkceProperties;
     }
 
-    @GetMapping
-    public void redirectToLoginPage(HttpServletResponse response) throws IOException {
-        LoginRedirectService.LoginRedirect redirect = loginRedirectService.getRedirect();
+    @GetMapping(params = "redirect_uri")
+    public void redirectToLoginPage(
+            @RequestParam("redirect_uri") String redirectUri,
+            HttpServletResponse response
+    ) throws IOException {
+        LoginRedirectService.LoginRedirect redirect = loginRedirectService.getRedirect(redirectUri);
 
-        Cookie code_verifier = createCodeVerifierCookie(redirect.getCodeVerifier());
+        Cookie codeVerifier = createCodeVerifierCookie(redirect.getCodeVerifier());
+        response.addCookie(codeVerifier);
 
-        response.addCookie(code_verifier);
+        Cookie redirectUriCookie = createRedirectUriCookie(redirectUri);
+        response.addCookie(redirectUriCookie);
+
         response.sendRedirect(redirect.getRedirectUrl());
     }
 
-    @PostMapping
+    @GetMapping(params = "code")
     public void getToken(
-            @RequestBody @Valid TokenRequest tokenRequest,
+            @RequestParam("code") String code,
             @CookieValue(CODE_VERIFIER_COOKIE_NAME) String codeVerifier,
+            @CookieValue(REDIRECT_URI_COOKIE_NAME) String redirectUri,
             HttpServletResponse response
     ) {
         PkceTokenRequestService.TokenResponse bearerToken = pkceTokenRequestService.requestToken(
-                tokenRequest.getCode(),
-                codeVerifier
+                code,
+                codeVerifier,
+                redirectUri
         );
 
         Cookie cookie = createBearerTokenCookie(bearerToken);
-
         response.addCookie(cookie);
-        response.addCookie(createCodeVerifierDeletionCookie());
+
+        response.addCookie(createDeletionCookie(CODE_VERIFIER_COOKIE_NAME));
+        response.addCookie(createDeletionCookie(REDIRECT_URI_COOKIE_NAME));
     }
 
     private Cookie createBearerTokenCookie(PkceTokenRequestService.TokenResponse token) {
@@ -75,8 +83,8 @@ public class PkceRestController {
         return cookie;
     }
 
-    private Cookie createCodeVerifierDeletionCookie() {
-        Cookie cookie = new Cookie(CODE_VERIFIER_COOKIE_NAME, null);
+    private Cookie createDeletionCookie(String name) {
+        Cookie cookie = new Cookie(name, null);
 
         cookie.setSecure(pkceProperties.getSecureCookie());
         cookie.setHttpOnly(true);
@@ -97,13 +105,14 @@ public class PkceRestController {
         return cookie;
     }
 
-    public static class TokenRequest {
-        @NotNull
-        @NotEmpty
-        private String code;
+    private Cookie createRedirectUriCookie(String redirectUri) {
+        Cookie cookie = new Cookie(REDIRECT_URI_COOKIE_NAME, redirectUri);
 
-        public String getCode() {
-            return code;
-        }
+        cookie.setSecure(pkceProperties.getSecureCookie());
+        cookie.setHttpOnly(true);
+        cookie.setPath("/oauth/pkce");
+        cookie.setMaxAge(3600);
+
+        return cookie;
     }
 }

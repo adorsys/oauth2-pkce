@@ -6,9 +6,7 @@ import {UserService} from "./user/user.service";
 import {HttpClientModule} from "@angular/common/http";
 import {RouterModule, Routes} from "@angular/router";
 import {TokenComponent} from './token/token.component';
-import {CodeProviderService} from "./auth/code-provider.service";
 import {TokenService} from "./auth/token.service";
-import {LoginResponseParserService} from "./auth/login-response-parser.service";
 import {AuthenticationService} from "./auth/authentication.service";
 import {Base64} from "./util/base64.service";
 
@@ -32,8 +30,6 @@ const routes: Routes = [
   ],
   providers: [
     UserService,
-    LoginResponseParserService,
-    CodeProviderService,
     TokenService,
     AuthenticationService,
     Base64

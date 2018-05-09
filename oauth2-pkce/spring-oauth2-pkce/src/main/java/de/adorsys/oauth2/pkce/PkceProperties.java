@@ -15,7 +15,6 @@ public class PkceProperties {
     private String userAuthorizationUri;
     private String userInfoUri;
     private String scope;
-    private String redirectUri;
     private String codeChallengeMethod;
     private String responseType;
     private String cookieName;
@@ -75,14 +74,6 @@ public class PkceProperties {
 
     public void setScope(String scope) {
         this.scope = scope;
-    }
-
-    public String getRedirectUri() {
-        return redirectUri;
-    }
-
-    public void setRedirectUri(String redirectUri) {
-        this.redirectUri = redirectUri;
     }
 
     public String getCodeChallengeMethod() {

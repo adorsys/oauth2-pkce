@@ -22,14 +22,14 @@ public class PkceTokenRequestService {
         this.pkceProperties = pkceProperties;
     }
 
-    public TokenResponse requestToken(String code, String codeVerifier) {
+    public TokenResponse requestToken(String code, String codeVerifier, String redirectUri) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", pkceProperties.getAuthorizationHeader());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> body= new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
-        body.add("redirect_uri", pkceProperties.getRedirectUri());
+        body.add("redirect_uri", redirectUri);
         body.add("code", code);
         body.add("code_verifier", codeVerifier);
 

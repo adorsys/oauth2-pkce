@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {Observable} from "rxjs/Observable";
 import {TokenService} from "./token.service";
 import "rxjs/add/operator/mergeMap";
-import {TokenResponse} from "./token-response";
 import {environment} from "../../environments/environment";
 import {Router} from "@angular/router";
 

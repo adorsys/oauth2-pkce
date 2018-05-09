@@ -18,7 +18,7 @@ public class LoginRedirectService {
         this.oauth2PkceFactory = oauth2PkceFactory;
     }
 
-    public LoginRedirect getRedirect() {
+    public LoginRedirect getRedirect(String redirectUri) {
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromHttpUrl(pkceProperties.getUserAuthorizationUri());
 
@@ -34,10 +34,12 @@ public class LoginRedirectService {
         builder.queryParam("nonce", nonce.getValue());
 
         builder.queryParam("response_type", pkceProperties.getResponseType());
-        builder.queryParam("redirect_uri", pkceProperties.getRedirectUri());
+        builder.queryParam("redirect_uri", redirectUri);
 
         State state = oauth2PkceFactory.generateState();
         builder.queryParam("state", state.getValue());
+
+        builder.queryParam("response_mode", "query");
 
         LoginRedirect loginRedirect = new LoginRedirect();
         loginRedirect.setCodeVerifier(codeVerifier);

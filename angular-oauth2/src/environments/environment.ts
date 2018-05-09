@@ -7,5 +7,5 @@ export const environment = {
   production: false,
   backendUrl: '',
   loginEndpoint: '/oauth/pkce',
-  tokenEndpoint: '/oauth/pkce',
+  redirectUri: 'http://localhost/token'
 };
