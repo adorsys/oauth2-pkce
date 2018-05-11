@@ -25,10 +25,3 @@ docker-compose down --remove-orphans && docker-compose up --build
 | http://localhost:8888 | spring-oauth2 endpoint |
 | http://localhost:80 | angular-oauth2 endpoint |
 | http://localhost:8080/auth/ | local keycloak endpoint |
-
-## Credentials
-
-| Username | Password | Description |
-|----------|----------|-------------|
-| admin    | admin123 | Keycloak admin unser |
-| myuser   | myuser123 | Keycloak TIMP user  |
