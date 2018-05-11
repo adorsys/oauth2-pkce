@@ -9,7 +9,7 @@ export class TokenService {
   constructor(private http: HttpClient) { }
 
   public getToken(code: string): Observable<void> {
-    let url = `${environment.backendUrl}${environment.loginEndpoint}?code=${code}`;
+    let url = `${environment.backendUrl}${environment.loginEndpoint}?code=${code}&redirect_uri=${environment.redirectUri}`;
     console.log(`GET ${url}`);
 
     return this.http.get<void>(

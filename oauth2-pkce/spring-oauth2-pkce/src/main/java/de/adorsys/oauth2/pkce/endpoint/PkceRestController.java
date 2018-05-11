@@ -15,8 +15,9 @@ import java.io.IOException;
 @RestController("/oauth/pkce")
 public class PkceRestController {
 
+    private static final String CODE_REQUEST_PARAMETER_NAME = "code";
     private static final String CODE_VERIFIER_COOKIE_NAME = "code_verifier";
-    private static final String REDIRECT_URI_COOKIE_NAME = "redirect_uri";
+    private static final String REDIRECT_URI_REQUEST_PARAMETER_NAME = "redirect_uri";
 
     private final PkceTokenRequestService pkceTokenRequestService;
     private final LoginRedirectService loginRedirectService;
@@ -36,9 +37,9 @@ public class PkceRestController {
         this.pkceProperties = pkceProperties;
     }
 
-    @GetMapping(params = "redirect_uri")
+    @GetMapping(params = REDIRECT_URI_REQUEST_PARAMETER_NAME)
     public void redirectToLoginPage(
-            @RequestParam("redirect_uri") String redirectUri,
+            @RequestParam(REDIRECT_URI_REQUEST_PARAMETER_NAME) String redirectUri,
             HttpServletResponse response
     ) throws IOException {
         LoginRedirectService.LoginRedirect redirect = loginRedirectService.getRedirect(redirectUri);
@@ -46,17 +47,14 @@ public class PkceRestController {
         Cookie codeVerifier = createCodeVerifierCookie(redirect.getCodeVerifier());
         response.addCookie(codeVerifier);
 
-        Cookie redirectUriCookie = createRedirectUriCookie(redirectUri);
-        response.addCookie(redirectUriCookie);
-
         response.sendRedirect(redirect.getRedirectUrl());
     }
 
-    @GetMapping(params = "code")
+    @GetMapping(params = {CODE_REQUEST_PARAMETER_NAME, REDIRECT_URI_REQUEST_PARAMETER_NAME})
     public void getToken(
-            @RequestParam("code") String code,
+            @RequestParam(CODE_REQUEST_PARAMETER_NAME) String code,
             @CookieValue(CODE_VERIFIER_COOKIE_NAME) String codeVerifier,
-            @CookieValue(REDIRECT_URI_COOKIE_NAME) String redirectUri,
+            @RequestParam(REDIRECT_URI_REQUEST_PARAMETER_NAME) String redirectUri,
             HttpServletResponse response
     ) {
         PkceTokenRequestService.TokenResponse bearerToken = pkceTokenRequestService.requestToken(
@@ -69,7 +67,6 @@ public class PkceRestController {
         response.addCookie(cookie);
 
         response.addCookie(createDeletionCookie(CODE_VERIFIER_COOKIE_NAME));
-        response.addCookie(createDeletionCookie(REDIRECT_URI_COOKIE_NAME));
     }
 
     private Cookie createBearerTokenCookie(PkceTokenRequestService.TokenResponse token) {
@@ -96,17 +93,6 @@ public class PkceRestController {
 
     private Cookie createCodeVerifierCookie(CodeVerifier codeVerifier) {
         Cookie cookie = new Cookie(CODE_VERIFIER_COOKIE_NAME, codeVerifier.getValue());
-
-        cookie.setSecure(pkceProperties.getSecureCookie());
-        cookie.setHttpOnly(true);
-        cookie.setPath("/oauth/pkce");
-        cookie.setMaxAge(3600);
-
-        return cookie;
-    }
-
-    private Cookie createRedirectUriCookie(String redirectUri) {
-        Cookie cookie = new Cookie(REDIRECT_URI_COOKIE_NAME, redirectUri);
 
         cookie.setSecure(pkceProperties.getSecureCookie());
         cookie.setHttpOnly(true);
