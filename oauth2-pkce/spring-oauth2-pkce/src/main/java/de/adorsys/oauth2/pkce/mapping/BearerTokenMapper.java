@@ -1,14 +1,13 @@
 package de.adorsys.oauth2.pkce.mapping;
 
-import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
+import java.io.IOException;
+import java.util.Base64;
+
 import org.adorsys.encobject.userdata.ObjectMapperSPI;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
-import java.io.IOException;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
 
 public class BearerTokenMapper {
 
@@ -17,30 +16,7 @@ public class BearerTokenMapper {
     public BearerTokenMapper(ObjectMapperSPI objectMapper) {
         this.objectMapper = objectMapper;
     }
-
-    public String mapToBase64(PkceTokenRequestService.TokenResponse tokenResponse) {
-        Map<String, Object> values = new HashMap<>();
-        values.put("access_token", tokenResponse.getAccess_token());
-        values.put("token_type", tokenResponse.getToken_type());
-        values.put("expires_in", tokenResponse.getExpires_in());
-
-        String valuesAsJson;
-        try {
-            valuesAsJson = objectMapper.writeValueAsString(values);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return toBase64(valuesAsJson);
-    }
-
-    private static String toBase64(String value) {
-        byte[] valueAsBytes = value.getBytes();
-        byte[] encodedBytes = Base64.getEncoder().encode(valueAsBytes);
-
-        return new String(encodedBytes);
-    }
-
+    
     public OAuth2AccessToken mapFromBase64(String tokenAsString) {
         String json = fromBase64(tokenAsString);
         return mapFromJson(json);

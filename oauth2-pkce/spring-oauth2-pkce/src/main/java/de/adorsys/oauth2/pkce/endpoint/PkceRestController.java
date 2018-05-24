@@ -1,16 +1,20 @@
 package de.adorsys.oauth2.pkce.endpoint;
 
-import de.adorsys.oauth2.pkce.PkceProperties;
-import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
-import de.adorsys.oauth2.pkce.mapping.BearerTokenMapper;
-import de.adorsys.oauth2.pkce.service.LoginRedirectService;
-import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import java.io.IOException;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import de.adorsys.oauth2.pkce.PkceProperties;
+import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
+import de.adorsys.oauth2.pkce.service.LoginRedirectService;
+import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
 
 @RestController("/oauth/pkce")
 public class PkceRestController {
@@ -21,19 +25,16 @@ public class PkceRestController {
 
     private final PkceTokenRequestService pkceTokenRequestService;
     private final LoginRedirectService loginRedirectService;
-    private final BearerTokenMapper mapper;
     private final PkceProperties pkceProperties;
 
     @Autowired
     public PkceRestController(
             PkceTokenRequestService pkceTokenRequestService,
             LoginRedirectService loginRedirectService,
-            BearerTokenMapper mapper,
             PkceProperties pkceProperties
     ) {
         this.pkceTokenRequestService = pkceTokenRequestService;
         this.loginRedirectService = loginRedirectService;
-        this.mapper = mapper;
         this.pkceProperties = pkceProperties;
     }
 
@@ -63,20 +64,19 @@ public class PkceRestController {
                 redirectUri
         );
 
-        Cookie cookie = createBearerTokenCookie(bearerToken);
-        response.addCookie(cookie);
-
+        response.addCookie(createCookie("access_token", bearerToken.getAccess_token(), bearerToken.getExpires_in()));
+        response.addCookie(createCookie("refresh_token", bearerToken.getRefresh_token(), bearerToken.anyRefreshTokenExpireIn()));
+        
         response.addCookie(createDeletionCookie(CODE_VERIFIER_COOKIE_NAME));
     }
 
-    private Cookie createBearerTokenCookie(PkceTokenRequestService.TokenResponse token) {
-        Cookie cookie = new Cookie(pkceProperties.getCookieName(), mapper.mapToBase64(token));
+    private Cookie createCookie(String name, String token, Long expiration) {
+    	Cookie cookie = new Cookie(name, token);
 
         cookie.setSecure(pkceProperties.getSecureCookie());
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(token.getExpires_in().intValue());
-
+        cookie.setMaxAge(expiration.intValue());
         return cookie;
     }
 

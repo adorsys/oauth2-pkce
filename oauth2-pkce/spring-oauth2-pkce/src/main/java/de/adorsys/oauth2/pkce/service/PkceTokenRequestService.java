@@ -1,15 +1,19 @@
 package de.adorsys.oauth2.pkce.service;
 
-import de.adorsys.oauth2.pkce.PkceProperties;
-import org.springframework.http.*;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.Date;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Date;
+import de.adorsys.oauth2.pkce.PkceProperties;
 
 public class PkceTokenRequestService {
 
@@ -65,6 +69,7 @@ public class PkceTokenRequestService {
         private String access_token;
         private String token_type;
         private Long expires_in;
+        private Long refresh_expires_in;
 
         public String getRefresh_token() {
             return refresh_token;
@@ -73,6 +78,10 @@ public class PkceTokenRequestService {
         public Long getRefresh_token_expires_in() {
             return refresh_token_expires_in;
         }
+
+        public Long getRefresh_expires_in() {
+			return refresh_expires_in;
+		}
 
         public String getId_token() {
             return id_token;
@@ -91,11 +100,26 @@ public class PkceTokenRequestService {
         }
 
         public boolean isExpired() {
-            Date expiration = Date.from(Instant.ofEpochMilli(expires_in));
+        	return isExpiredInternal(expires_in);
+        }
+        
+        public boolean isRefreshTokenExpired() {
+        	return isExpiredInternal(refresh_expires_in) && isExpiredInternal(refresh_token_expires_in);
+        }
+        
+        public Long anyRefreshTokenExpireIn() {
+        	if(refresh_expires_in != null) return refresh_expires_in;
+        	return refresh_token_expires_in;
+        }
+        
+        private static boolean isExpiredInternal(Long expireIn) {
+        	if(expireIn == null) return true;
+            Date expiration = Date.from(Instant.ofEpochMilli(expireIn));
             return expiration.before(new Date());
         }
+        
 
-        @Override
+		@Override
         public String toString() {
             return "TokenResponse{" +
                     "refresh_token='" + refresh_token + '\'' +
