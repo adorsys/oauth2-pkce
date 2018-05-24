@@ -5,3 +5,12 @@ target/
 .docker-build/
 .DS_Store
 pom.xml.versionsBackup
+
+oauth2-pkce/.project
+oauth2-pkce/.settings/
+oauth2-pkce/example-starter/.classpath
+oauth2-pkce/example-starter/.project
+oauth2-pkce/example-starter/.settings/
+oauth2-pkce/spring-oauth2-pkce/.classpath
+oauth2-pkce/spring-oauth2-pkce/.project
+oauth2-pkce/spring-oauth2-pkce/.settings/
