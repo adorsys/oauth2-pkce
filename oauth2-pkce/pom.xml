@@ -6,7 +6,7 @@
 
     <groupId>de.adorsys.oauth2-pkce</groupId>
     <artifactId>parent</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>OAuth2-PKCE</name>
