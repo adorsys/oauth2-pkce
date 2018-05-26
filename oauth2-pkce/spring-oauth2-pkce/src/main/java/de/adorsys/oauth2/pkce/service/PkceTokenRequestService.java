@@ -14,6 +14,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import de.adorsys.oauth2.pkce.PkceProperties;
+import de.adorsys.oauth2.pkce.util.TokenConstants;
 
 public class PkceTokenRequestService {
 
@@ -32,7 +33,7 @@ public class PkceTokenRequestService {
 
     public TokenResponse requestToken(String code, String codeVerifier, String redirectUri) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + buildAuthorizationHeader());
+        headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Basic " + buildAuthorizationHeader());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> body= new LinkedMultiValueMap<>();
@@ -52,6 +53,24 @@ public class PkceTokenRequestService {
 
         return exchange.getBody();
     }
+    
+    public TokenResponse refreshAccessToken(String refreshToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Basic " + buildAuthorizationHeader());
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "refresh_token");
+        body.add("refresh_token", refreshToken);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+        ResponseEntity<TokenResponse> exchange = restTemplate.exchange(pkceProperties.getAccessTokenUri(), HttpMethod.POST, request,
+                TokenResponse.class);
+
+        return exchange.getBody();
+    }
+    
 
     private String buildAuthorizationHeader() {
         String clientId = pkceProperties.getClientId();
