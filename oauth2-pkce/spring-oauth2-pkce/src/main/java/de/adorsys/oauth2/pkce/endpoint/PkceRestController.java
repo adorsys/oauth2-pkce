@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,7 +17,8 @@ import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
 import de.adorsys.oauth2.pkce.service.LoginRedirectService;
 import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
 
-@RestController("/oauth/pkce")
+@RestController("Oauth Endpoint")
+@RequestMapping(path="/oauth/pkce")
 public class PkceRestController {
 
     private static final String CODE_REQUEST_PARAMETER_NAME = "code";
