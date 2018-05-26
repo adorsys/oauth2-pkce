@@ -3,9 +3,11 @@ package de.adorsys.oauth2.pkce.endpoint;
 import java.io.IOException;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,13 +57,29 @@ public class PkceRestController {
         response.sendRedirect(redirect.getRedirectUrl());
     }
 
-    @GetMapping(params = {CODE_REQUEST_PARAMETER_NAME, REDIRECT_URI_REQUEST_PARAMETER_NAME})
-    public void getToken(
+    @GetMapping(params = {CODE_REQUEST_PARAMETER_NAME})
+    public void getTokenFromCode(
+            HttpServletRequest request,
             @RequestParam(CODE_REQUEST_PARAMETER_NAME) String code,
             @CookieValue(CODE_VERIFIER_COOKIE_NAME) String codeVerifier,
-            @RequestParam(REDIRECT_URI_REQUEST_PARAMETER_NAME) String redirectUri,
             HttpServletResponse response
-    ) {
+    ) throws IOException {
+        String redirectUri = null;
+        Object redirectUriAttribute = request.getAttribute(REDIRECT_URI_REQUEST_PARAMETER_NAME);
+        if(redirectUriAttribute!=null){
+            redirectUri = redirectUriAttribute.toString();
+        }
+        Assert.notNull(redirectUri, "Missing redirect URI");
+        getToken(request, code, codeVerifier, redirectUri, response);
+    }
+    
+    @GetMapping(params = {CODE_REQUEST_PARAMETER_NAME, REDIRECT_URI_REQUEST_PARAMETER_NAME})
+    public void getToken(HttpServletRequest request,
+            @RequestParam(CODE_REQUEST_PARAMETER_NAME) String code,
+            @CookieValue(CODE_VERIFIER_COOKIE_NAME) String codeVerifier,
+            @RequestParam(name = REDIRECT_URI_REQUEST_PARAMETER_NAME, required=false) String redirectUri,
+            HttpServletResponse response
+    ) throws IOException {        
         PkceTokenRequestService.TokenResponse bearerToken = pkceTokenRequestService.requestToken(
                 code,
                 codeVerifier,
@@ -72,6 +90,11 @@ public class PkceRestController {
         response.addCookie(createCookie(TokenConstants.REFRESH_TOKEN_COOKIE_NAME, bearerToken.getRefresh_token(), bearerToken.anyRefreshTokenExpireIn()));
         
         response.addCookie(createDeletionCookie(CODE_VERIFIER_COOKIE_NAME));
+        
+        Object clientDisplayPage = request.getAttribute(TokenConstants.CLIENT_DISPLAY_PAGE);
+        if(clientDisplayPage!=null){
+            response.sendRedirect(clientDisplayPage.toString());
+        }
     }
 
     private Cookie createCookie(String name, String token, Long expiration) {
