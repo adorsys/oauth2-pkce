@@ -16,11 +16,13 @@ import de.adorsys.oauth2.pkce.PkceProperties;
 import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
 import de.adorsys.oauth2.pkce.service.LoginRedirectService;
 import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
+import de.adorsys.oauth2.pkce.util.TokenConstants;
 
 @RestController("Oauth Endpoint")
-@RequestMapping(path="/oauth/pkce")
+@RequestMapping(path=PkceRestController.OAUTH_AUTHENTICATION_ENDPOINT)
 public class PkceRestController {
 
+    public static final String OAUTH_AUTHENTICATION_ENDPOINT = "/oauth/pkce";
     private static final String CODE_REQUEST_PARAMETER_NAME = "code";
     private static final String CODE_VERIFIER_COOKIE_NAME = "code_verifier";
     private static final String REDIRECT_URI_REQUEST_PARAMETER_NAME = "redirect_uri";
@@ -66,8 +68,8 @@ public class PkceRestController {
                 redirectUri
         );
 
-        response.addCookie(createCookie("access_token", bearerToken.getAccess_token(), bearerToken.getExpires_in()));
-        response.addCookie(createCookie("refresh_token", bearerToken.getRefresh_token(), bearerToken.anyRefreshTokenExpireIn()));
+        response.addCookie(createCookie(TokenConstants.ACCESS_TOKEN_COOKIE_NAME, bearerToken.getAccess_token(), bearerToken.getExpires_in()));
+        response.addCookie(createCookie(TokenConstants.REFRESH_TOKEN_COOKIE_NAME, bearerToken.getRefresh_token(), bearerToken.anyRefreshTokenExpireIn()));
         
         response.addCookie(createDeletionCookie(CODE_VERIFIER_COOKIE_NAME));
     }
@@ -87,7 +89,7 @@ public class PkceRestController {
 
         cookie.setSecure(pkceProperties.getSecureCookie());
         cookie.setHttpOnly(true);
-        cookie.setPath("/oauth/pkce");
+        cookie.setPath(OAUTH_AUTHENTICATION_ENDPOINT);
         cookie.setMaxAge(0);
 
         return cookie;
@@ -98,7 +100,7 @@ public class PkceRestController {
 
         cookie.setSecure(pkceProperties.getSecureCookie());
         cookie.setHttpOnly(true);
-        cookie.setPath("/oauth/pkce");
+        cookie.setPath(OAUTH_AUTHENTICATION_ENDPOINT);
         cookie.setMaxAge(3600);
 
         return cookie;
