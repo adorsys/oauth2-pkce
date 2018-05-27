@@ -38,7 +38,7 @@ public class PkceTokenRequestService {
 
         MultiValueMap<String, String> body= new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
-        body.add("redirect_uri", redirectUri);
+        body.add(TokenConstants.REDIRECT_URI_PARAM_NAME, redirectUri);
         body.add("code", code);
         body.add("code_verifier", codeVerifier);
 

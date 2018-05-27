@@ -13,7 +13,7 @@ public class CookieService {
     @Autowired
     private PkceProperties pkceProperties;
     
-    public Cookie createCookie(String name, String value, String path, int maxAge) {
+    public Cookie creationCookie(String name, String value, String path, int maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setSecure(pkceProperties.getSecureCookie());
         cookie.setHttpOnly(true);
@@ -22,7 +22,7 @@ public class CookieService {
         return cookie;
     }
 
-    public Cookie createDeletionCookie(String name, String path) {
+    public Cookie deletionCookie(String name, String path) {
         Cookie cookie = new Cookie(name, null);
         cookie.setSecure(pkceProperties.getSecureCookie());
         cookie.setHttpOnly(true);

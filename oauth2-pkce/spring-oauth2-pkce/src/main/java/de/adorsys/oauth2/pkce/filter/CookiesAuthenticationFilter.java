@@ -59,10 +59,10 @@ public class CookiesAuthenticationFilter implements Filter {
     private void cookieToAuthHeader(HttpServletRequest request, HttpServletResponse response, HeaderMapRequestWrapper requestWrapper) {
         String accessToken = null;
 
-        Cookie accessTokenCookie = WebUtils.getCookie(request, TokenConstants.ACCESS_TOKEN_COOKIE_NAME);
+        Cookie accessTokenCookie = WebUtils.getCookie(request, pkceProperties.getAccessTokenCookieName());
 
         if (accessTokenCookie == null || StringUtils.isBlank(accessTokenCookie.getValue())) {
-            Cookie refreshTokenCookie = WebUtils.getCookie(request, TokenConstants.REFRESH_TOKEN_COOKIE_NAME);
+            Cookie refreshTokenCookie = WebUtils.getCookie(request, pkceProperties.getRefreshTokenCookieName());
             if (refreshTokenCookie != null && StringUtils.isNotBlank(refreshTokenCookie.getValue())) {
                 accessToken = mightRefreshAccessToken(request, response, refreshTokenCookie.getValue());
             }
@@ -72,9 +72,6 @@ public class CookiesAuthenticationFilter implements Filter {
 
         // Attach the access token in the
         if (StringUtils.isNotBlank(accessToken)) {
-//            if (logger.isDebugEnabled()) {
-//                logger.debug("Adding access_token from secure cookies to the Authorization header. '");
-//            }
             requestWrapper.addHeader(TokenConstants.AUTHORIZATION_HEADER_NAME, "Bearer " + accessToken);
         }
     }
@@ -91,8 +88,8 @@ public class CookiesAuthenticationFilter implements Filter {
         int expireIn = newBearerToken != null ? newBearerToken.getExpires_in().intValue() : 0;
         int refreshTokenExpireIn = newBearerToken != null ? newBearerToken.anyRefreshTokenExpireIn().intValue() : 0;
 
-        response.addCookie(createCookie(TokenConstants.ACCESS_TOKEN_COOKIE_NAME, accessTokenToken, expireIn));
-        response.addCookie(createCookie(TokenConstants.REFRESH_TOKEN_COOKIE_NAME, refreshToken, refreshTokenExpireIn));
+        response.addCookie(createCookie(pkceProperties.getAccessTokenCookieName(), accessTokenToken, expireIn));
+        response.addCookie(createCookie(pkceProperties.getRefreshTokenCookieName(), refreshToken, refreshTokenExpireIn));
     }
 
     private Cookie createCookie(String name, String token, int expiration) {

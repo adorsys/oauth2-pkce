@@ -2,8 +2,11 @@ package de.adorsys.oauth2.pkce.filter;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -23,6 +26,7 @@ import org.springframework.web.util.WebUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.adorsys.oauth2.pkce.PkceProperties;
 import de.adorsys.oauth2.pkce.basetypes.ByteArray;
 import de.adorsys.oauth2.pkce.service.CookieService;
 import de.adorsys.oauth2.pkce.util.Base64Encoder;
@@ -35,6 +39,16 @@ public class ClientAuthencationEntryPoint implements Filter {
 
     @Autowired
     private CookieService cookieService;
+    
+    @Autowired
+    private PkceProperties pkceProperties;
+    
+    List<String> userAgentAutoProtectedPages;
+    
+    @PostConstruct
+    public void postConstruct(){
+        userAgentAutoProtectedPages = pkceProperties.userAgentAutoProtectedPages();
+    }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -43,6 +57,7 @@ public class ClientAuthencationEntryPoint implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
         String requestUrl = request.getRequestURL().toString();
+        String authEndpoint = pkceProperties.getAuthEndpoint();
 
         String header = request.getHeader(TokenConstants.AUTHORIZATION_HEADER_NAME);
         if (header != null) {
@@ -51,27 +66,28 @@ public class ClientAuthencationEntryPoint implements Filter {
         }
         
         // If request is a call from swagger ui
-        String targetRequest = "/swagger-ui.html"; 
-        if(StringUtils.containsIgnoreCase(requestUrl, targetRequest)){
+        Optional<String> targetRequestPresent = findTargetRequest(requestUrl); 
+        if(targetRequestPresent.isPresent()){
+            String targetRequest = targetRequestPresent.get();
             ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(request);
             String ext = builder.removePathExtension();
-            String redirectUri = builder.replacePath("/oauth/pkce").build().toUriString();
+            String redirectUri = builder.replacePath(authEndpoint).build().toUriString();
             // Redirect to oauth pkce
             response.addCookie(redirectCookie(targetRequest, redirectUri));
-            response.sendRedirect("/oauth/pkce?redirect_uri="+redirectUri);
+            response.sendRedirect(authEndpoint + "?"+TokenConstants.REDIRECT_URI_PARAM_NAME+"="+redirectUri);
             return;
         }
 
         // If request is a redirect back from idp
-        if(StringUtils.containsIgnoreCase(requestUrl, "/oauth/pkce") && StringUtils.isNotBlank(request.getParameter("code"))){
-            RedirectCookie redirectCookie = readRedirectCookie(request);
+        if(StringUtils.endsWithIgnoreCase(requestUrl, authEndpoint) && StringUtils.isNotBlank(request.getParameter("code"))){
+            UserAgentStateCookie redirectCookie = readUserAgentStateCookie(request);
             if(redirectCookie!=null){
                 
                 // Add redirect uri
-                request.setAttribute("redirect_uri", redirectCookie.getRedirectUri());
-                request.setAttribute(TokenConstants.CLIENT_DISPLAY_PAGE, redirectCookie.getClientDisplayPage());
+                request.setAttribute(TokenConstants.REDIRECT_URI_PARAM_NAME, redirectCookie.getRedirectUri());
+                request.setAttribute(TokenConstants.USER_AGENT_PAGE_ATTRIBUTE, redirectCookie.getUserAgentPage());
                 // delete cookie
-                response.addCookie(deleteRedirectCookie());
+                response.addCookie(deleteUserAgentStateCookie());
                 
                 // proceed with request
                 chain.doFilter(request, response);
@@ -82,25 +98,29 @@ public class ClientAuthencationEntryPoint implements Filter {
         chain.doFilter(request, response);
     }
 
-    private Cookie deleteRedirectCookie() {
-        return cookieService.createDeletionCookie(TokenConstants.REDIRECT_COOKIE_NAME, "/oauth/pkce");
+    private Optional<String> findTargetRequest(String requestUrl) {
+        return userAgentAutoProtectedPages.stream().filter(s -> StringUtils.endsWithIgnoreCase(requestUrl, s)).findFirst();
+    }
+
+    private Cookie deleteUserAgentStateCookie() {
+        return cookieService.deletionCookie(pkceProperties.getUserAgentStateCookieName(), pkceProperties.getAuthEndpoint());
     }
 
     ObjectMapper objectMapper = new ObjectMapper();
     Base64Encoder base64Encoder = new Base64Encoder();
 
     private Cookie redirectCookie(String origLocation, String redirectUri) throws JsonProcessingException {
-        RedirectCookie redirectCookie = new RedirectCookie(origLocation, redirectUri);
-        String cokieValue = base64Encoder.toBase64(new ByteArray(objectMapper.writeValueAsBytes(redirectCookie)));
-        return cookieService.createCookie(TokenConstants.REDIRECT_COOKIE_NAME, cokieValue, "/oauth/pkce", 3600);
+        UserAgentStateCookie userAgentStateCookie = new UserAgentStateCookie(origLocation, redirectUri);
+        String cokieValue = base64Encoder.toBase64(new ByteArray(objectMapper.writeValueAsBytes(userAgentStateCookie)));
+        return cookieService.creationCookie(pkceProperties.getUserAgentStateCookieName(), cokieValue, pkceProperties.getAuthEndpoint(), 3600);
     }
     
-    private RedirectCookie readRedirectCookie(HttpServletRequest request){
-        Cookie cookie = WebUtils.getCookie(request, TokenConstants.REDIRECT_COOKIE_NAME);
+    private UserAgentStateCookie readUserAgentStateCookie(HttpServletRequest request){
+        Cookie cookie = WebUtils.getCookie(request, pkceProperties.getUserAgentStateCookieName());
         if(cookie==null || StringUtils.isBlank(cookie.getValue())) return null;
         byte[] decoded = Base64.getDecoder().decode(cookie.getValue());
         try {
-            return objectMapper.readValue(decoded, RedirectCookie.class);
+            return objectMapper.readValue(decoded, UserAgentStateCookie.class);
         } catch (IOException e) {
             logger.severe(e.getMessage());
             // Log exception
@@ -116,28 +136,30 @@ public class ClientAuthencationEntryPoint implements Filter {
     public void init(FilterConfig paramFilterConfig) throws ServletException {
     }
     
-    public static class RedirectCookie {
+    public static class UserAgentStateCookie {
+        // URI used to redirect controll to client after tocken obtained.
         private String redirectUri;
-        private String clientDisplayPage;
+        // location to redirect to.
+        private String userAgentPage;
         
-        public RedirectCookie() {
+        public UserAgentStateCookie() {
         }
-        public RedirectCookie(String origLocation, String redirectUri) {
+        public UserAgentStateCookie(String userAgentPage, String redirectUri) {
             super();
             this.redirectUri = redirectUri;
-            this.clientDisplayPage = origLocation;
+            this.userAgentPage = userAgentPage;
         }
         public String getRedirectUri() {
             return redirectUri;
         }
-        public String getClientDisplayPage() {
-            return clientDisplayPage;
+        public String getUserAgentPage() {
+            return userAgentPage;
         }
         public void setRedirectUri(String redirectUri) {
             this.redirectUri = redirectUri;
         }
-        public void setClientDisplayPage(String origLocation) {
-            this.clientDisplayPage = origLocation;
+        public void setuserAgentPage(String userAgentPage) {
+            this.userAgentPage = userAgentPage;
         }
         
     }

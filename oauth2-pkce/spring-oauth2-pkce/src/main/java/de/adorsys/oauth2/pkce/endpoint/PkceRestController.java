@@ -8,26 +8,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.WebUtils;
 
 import de.adorsys.oauth2.pkce.PkceProperties;
 import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
+import de.adorsys.oauth2.pkce.service.CookieService;
 import de.adorsys.oauth2.pkce.service.LoginRedirectService;
 import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
 import de.adorsys.oauth2.pkce.util.TokenConstants;
 
 @RestController("Oauth Endpoint")
-@RequestMapping(path=PkceRestController.OAUTH_AUTHENTICATION_ENDPOINT)
+//@RequestMapping set with de.adorsys.oauth2.pkce.WebConfig
 public class PkceRestController {
 
-    public static final String OAUTH_AUTHENTICATION_ENDPOINT = "/oauth/pkce";
-    private static final String CODE_REQUEST_PARAMETER_NAME = "code";
-    private static final String CODE_VERIFIER_COOKIE_NAME = "code_verifier";
-    private static final String REDIRECT_URI_REQUEST_PARAMETER_NAME = "redirect_uri";
 
     private final PkceTokenRequestService pkceTokenRequestService;
     private final LoginRedirectService loginRedirectService;
@@ -44,9 +40,9 @@ public class PkceRestController {
         this.pkceProperties = pkceProperties;
     }
 
-    @GetMapping(params = REDIRECT_URI_REQUEST_PARAMETER_NAME)
+    @GetMapping(params = TokenConstants.REDIRECT_URI_PARAM_NAME)
     public void redirectToLoginPage(
-            @RequestParam(REDIRECT_URI_REQUEST_PARAMETER_NAME) String redirectUri,
+            @RequestParam(TokenConstants.REDIRECT_URI_PARAM_NAME) String redirectUri,
             HttpServletResponse response
     ) throws IOException {
         LoginRedirectService.LoginRedirect redirect = loginRedirectService.getRedirect(redirectUri);
@@ -57,75 +53,61 @@ public class PkceRestController {
         response.sendRedirect(redirect.getRedirectUrl());
     }
 
-    @GetMapping(params = {CODE_REQUEST_PARAMETER_NAME})
+    @GetMapping(params = {TokenConstants.CODE_REQUEST_PARAMETER_NAME})
     public void getTokenFromCode(
             HttpServletRequest request,
-            @RequestParam(CODE_REQUEST_PARAMETER_NAME) String code,
-            @CookieValue(CODE_VERIFIER_COOKIE_NAME) String codeVerifier,
+            @RequestParam(TokenConstants.CODE_REQUEST_PARAMETER_NAME) String code,
             HttpServletResponse response
     ) throws IOException {
         String redirectUri = null;
-        Object redirectUriAttribute = request.getAttribute(REDIRECT_URI_REQUEST_PARAMETER_NAME);
+        Object redirectUriAttribute = request.getAttribute(TokenConstants.REDIRECT_URI_PARAM_NAME);
         if(redirectUriAttribute!=null){
             redirectUri = redirectUriAttribute.toString();
         }
         Assert.notNull(redirectUri, "Missing redirect URI");
-        getToken(request, code, codeVerifier, redirectUri, response);
+        getToken(request, code, redirectUri, response);
     }
     
-    @GetMapping(params = {CODE_REQUEST_PARAMETER_NAME, REDIRECT_URI_REQUEST_PARAMETER_NAME})
+    @GetMapping(params = {TokenConstants.CODE_REQUEST_PARAMETER_NAME, TokenConstants.REDIRECT_URI_PARAM_NAME})
     public void getToken(HttpServletRequest request,
-            @RequestParam(CODE_REQUEST_PARAMETER_NAME) String code,
-            @CookieValue(CODE_VERIFIER_COOKIE_NAME) String codeVerifier,
-            @RequestParam(name = REDIRECT_URI_REQUEST_PARAMETER_NAME, required=false) String redirectUri,
+            @RequestParam(TokenConstants.CODE_REQUEST_PARAMETER_NAME) String code,
+            @RequestParam(name = TokenConstants.REDIRECT_URI_PARAM_NAME, required=false) String redirectUri,
             HttpServletResponse response
-    ) throws IOException {        
+    ) throws IOException {   
+        Cookie cookie = WebUtils.getCookie(request, pkceProperties.getCodeVerifierCookieName());
+        Assert.notNull(cookie, "Missing cookie with name: " + pkceProperties.getCodeVerifierCookieName());
+        String codeVerifier = cookie.getValue();
         PkceTokenRequestService.TokenResponse bearerToken = pkceTokenRequestService.requestToken(
                 code,
                 codeVerifier,
                 redirectUri
         );
 
-        response.addCookie(createCookie(TokenConstants.ACCESS_TOKEN_COOKIE_NAME, bearerToken.getAccess_token(), bearerToken.getExpires_in()));
-        response.addCookie(createCookie(TokenConstants.REFRESH_TOKEN_COOKIE_NAME, bearerToken.getRefresh_token(), bearerToken.anyRefreshTokenExpireIn()));
+        response.addCookie(createTokenCookie(pkceProperties.getAccessTokenCookieName(), bearerToken.getAccess_token(), bearerToken.getExpires_in()));
+        response.addCookie(createTokenCookie(pkceProperties.getRefreshTokenCookieName(), bearerToken.getRefresh_token(), bearerToken.anyRefreshTokenExpireIn()));
         
-        response.addCookie(createDeletionCookie(CODE_VERIFIER_COOKIE_NAME));
+        response.addCookie(deleteCodeVerifierCookie());
         
-        Object clientDisplayPage = request.getAttribute(TokenConstants.CLIENT_DISPLAY_PAGE);
+        Object clientDisplayPage = request.getAttribute(TokenConstants.USER_AGENT_PAGE_ATTRIBUTE);
         if(clientDisplayPage!=null){
             response.sendRedirect(clientDisplayPage.toString());
         }
     }
+    
+    @Autowired
+    private CookieService cookieService;
 
-    private Cookie createCookie(String name, String token, Long expiration) {
-    	Cookie cookie = new Cookie(name, token);
-
-        cookie.setSecure(pkceProperties.getSecureCookie());
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(expiration.intValue());
-        return cookie;
+    // Cookie not deleted. they expire.
+    private Cookie createTokenCookie(String name, String token, Long expiration) {
+        return cookieService.creationCookie(name, token, "/", expiration.intValue());    	
     }
 
-    private Cookie createDeletionCookie(String name) {
-        Cookie cookie = new Cookie(name, null);
-
-        cookie.setSecure(pkceProperties.getSecureCookie());
-        cookie.setHttpOnly(true);
-        cookie.setPath(OAUTH_AUTHENTICATION_ENDPOINT);
-        cookie.setMaxAge(0);
-
-        return cookie;
+    // 
+    private Cookie deleteCodeVerifierCookie() {
+        return cookieService.deletionCookie(pkceProperties.getCodeVerifierCookieName(), pkceProperties.getAuthEndpoint());
     }
 
     private Cookie createCodeVerifierCookie(CodeVerifier codeVerifier) {
-        Cookie cookie = new Cookie(CODE_VERIFIER_COOKIE_NAME, codeVerifier.getValue());
-
-        cookie.setSecure(pkceProperties.getSecureCookie());
-        cookie.setHttpOnly(true);
-        cookie.setPath(OAUTH_AUTHENTICATION_ENDPOINT);
-        cookie.setMaxAge(3600);
-
-        return cookie;
+        return cookieService.creationCookie(pkceProperties.getCodeVerifierCookieName(), codeVerifier.getValue(), pkceProperties.getAuthEndpoint(), 3600);
     }
 }
