@@ -38,7 +38,7 @@ public class PkceTokenRequestService {
 
         MultiValueMap<String, String> body= new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
-        body.add("redirect_uri", redirectUri);
+        body.add(TokenConstants.REDIRECT_URI_PARAM_NAME, redirectUri);
         body.add("code", code);
         body.add("code_verifier", codeVerifier);
 
@@ -70,6 +70,16 @@ public class PkceTokenRequestService {
 
         return exchange.getBody();
     }
+    
+    public UserInfo userInfo(String accessToken){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Bearer " + accessToken);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(null, headers);
+        ResponseEntity<UserInfo> exchange = restTemplate.exchange(pkceProperties.getUserInfoUri(), HttpMethod.GET, request,
+                UserInfo.class);
+        return exchange.getBody();
+    }
+    
     
 
     private String buildAuthorizationHeader() {

@@ -6,6 +6,8 @@ import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
 import de.adorsys.oauth2.pkce.basetypes.Nonce;
 import de.adorsys.oauth2.pkce.basetypes.State;
 import de.adorsys.oauth2.pkce.context.Oauth2PkceFactory;
+import de.adorsys.oauth2.pkce.util.TokenConstants;
+
 import org.springframework.web.util.UriComponentsBuilder;
 
 public class LoginRedirectService {
@@ -34,7 +36,7 @@ public class LoginRedirectService {
         builder.queryParam("nonce", nonce.getValue());
 
         builder.queryParam("response_type", pkceProperties.getResponseType());
-        builder.queryParam("redirect_uri", redirectUri);
+        builder.queryParam(TokenConstants.REDIRECT_URI_PARAM_NAME, redirectUri);
 
         State state = oauth2PkceFactory.generateState();
         builder.queryParam("state", state.getValue());

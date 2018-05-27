@@ -1,22 +1,17 @@
 package de.adorsys.springoauth2;
 
-//@RestController
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
 public class MyRestController {
 
-//    private final AccessTokenProvider accessTokenProvider;
-//
-//    @Autowired
-//    public MyRestController(AccessTokenProvider accessTokenProvider) {
-//        this.accessTokenProvider = accessTokenProvider;
-//    }
-//
-//    @GetMapping({ "/user", "/me" })
-//    public Principal user(Principal principal) {
-//        return principal;
-//    }
-//
-//    @GetMapping("/accesstoken")
-//    public OAuth2AccessToken getToken() {
-//        return accessTokenProvider.get();
-//    }
+
+    @GetMapping({ "/user", "/me" })
+    public String user() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return String.format("Hello %s my friend.", (authentication!=null && authentication.getPrincipal()!=null?authentication.getPrincipal().toString():"Unknown"));
+    }
 }

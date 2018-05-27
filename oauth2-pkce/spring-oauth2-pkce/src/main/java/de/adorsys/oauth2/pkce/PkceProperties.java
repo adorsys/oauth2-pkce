@@ -1,5 +1,10 @@
 package de.adorsys.oauth2.pkce;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -16,8 +21,17 @@ public class PkceProperties {
     private String scope;
     private String codeChallengeMethod;
     private String responseType;
-    private String cookieName;
     private Boolean secureCookie = true;
+    private String authEndpoint;
+    // List of requestUrl that lead to auto trigerring auth
+    private String userAgentAutoProtectedPages;
+
+    private String accessTokenCookieName;
+    private String refreshTokenCookieName;
+    // code_verifier
+    private String codeVerifierCookieName;
+    // =user_agent_state
+    private String userAgentStateCookieName;
 
     public String getClientId() {
         return clientId;
@@ -83,14 +97,6 @@ public class PkceProperties {
         this.responseType = responseType;
     }
 
-    public String getCookieName() {
-        return cookieName;
-    }
-
-    public void setCookieName(String cookieName) {
-        this.cookieName = cookieName;
-    }
-
     public Boolean getSecureCookie() {
         return secureCookie;
     }
@@ -98,4 +104,58 @@ public class PkceProperties {
     public void setSecureCookie(Boolean secureCookie) {
         this.secureCookie = secureCookie;
     }
+
+    public String getAuthEndpoint() {
+        return authEndpoint;
+    }
+
+    public void setAuthEndpoint(String authEndpoint) {
+        this.authEndpoint = authEndpoint;
+    }
+
+    public String getUserAgentAutoProtectedPages() {
+        return userAgentAutoProtectedPages;
+    }
+
+    public void setUserAgentAutoProtectedPages(String userAgentAutoProtectedPages) {
+        this.userAgentAutoProtectedPages = userAgentAutoProtectedPages;
+    }
+    
+    public List<String> userAgentAutoProtectedPages(){
+        if(StringUtils.isBlank(userAgentAutoProtectedPages)) return Collections.emptyList();
+        return Arrays.asList(userAgentAutoProtectedPages.split(","));
+    }
+
+    public String getAccessTokenCookieName() {
+        return accessTokenCookieName;
+    }
+
+    public void setAccessTokenCookieName(String accessTokenCookieName) {
+        this.accessTokenCookieName = accessTokenCookieName;
+    }
+
+    public String getRefreshTokenCookieName() {
+        return refreshTokenCookieName;
+    }
+
+    public void setRefreshTokenCookieName(String refreshTokenCookieName) {
+        this.refreshTokenCookieName = refreshTokenCookieName;
+    }
+
+    public String getCodeVerifierCookieName() {
+        return codeVerifierCookieName;
+    }
+
+    public void setCodeVerifierCookieName(String codeVerifierCookieName) {
+        this.codeVerifierCookieName = codeVerifierCookieName;
+    }
+
+    public String getUserAgentStateCookieName() {
+        return userAgentStateCookieName;
+    }
+
+    public void setUserAgentStateCookieName(String userAgentStateCookieName) {
+        this.userAgentStateCookieName = userAgentStateCookieName;
+    }
+    
 }
