@@ -24,17 +24,20 @@ public class MySecurityConfiguration extends WebSecurityConfigurerAdapter {
     private TokenAuthenticationService tokenAuthenticationService;
     private CookiesAuthenticationFilter cookiesAuthenticationFilter;
     private ClientAuthencationEntryPoint clientAuthencationEntryPoint;
-    
+    private OpaqueTokenAuthenticationFilter opaqueTokenAuthenticationFilter;
     private PkceProperties pkceProperties;
+    
     public MySecurityConfiguration(TokenAuthenticationService tokenAuthenticationService,
             CookiesAuthenticationFilter cookiesAuthenticationFilter, ClientAuthencationEntryPoint clientAuthencationEntryPoint,
-            PkceProperties pkceProperties) {
+            de.adorsys.springoauth2.OpaqueTokenAuthenticationFilter opaqueTokenAuthenticationFilter, PkceProperties pkceProperties) {
         super();
         this.tokenAuthenticationService = tokenAuthenticationService;
         this.cookiesAuthenticationFilter = cookiesAuthenticationFilter;
         this.clientAuthencationEntryPoint = clientAuthencationEntryPoint;
+        this.opaqueTokenAuthenticationFilter = opaqueTokenAuthenticationFilter;
         this.pkceProperties = pkceProperties;
     }
+
 
 
     @Override
@@ -54,7 +57,8 @@ public class MySecurityConfiguration extends WebSecurityConfigurerAdapter {
             .csrf()
                 .disable();
         http.addFilterBefore(new JWTAuthenticationFilter(tokenAuthenticationService), BasicAuthenticationFilter.class)
-        .addFilterBefore(cookiesAuthenticationFilter, JWTAuthenticationFilter.class)
-        .addFilterAfter(clientAuthencationEntryPoint,CookiesAuthenticationFilter.class);
+        .addFilterBefore(opaqueTokenAuthenticationFilter, JWTAuthenticationFilter.class)
+        .addFilterBefore(clientAuthencationEntryPoint,OpaqueTokenAuthenticationFilter.class)
+        .addFilterBefore(cookiesAuthenticationFilter, ClientAuthencationEntryPoint.class);
     }
 }

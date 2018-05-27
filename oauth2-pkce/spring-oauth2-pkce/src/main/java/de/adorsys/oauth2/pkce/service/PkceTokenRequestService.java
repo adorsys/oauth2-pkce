@@ -71,6 +71,16 @@ public class PkceTokenRequestService {
         return exchange.getBody();
     }
     
+    public UserInfo userInfo(String accessToken){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Bearer " + accessToken);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(null, headers);
+        ResponseEntity<UserInfo> exchange = restTemplate.exchange(pkceProperties.getUserInfoUri(), HttpMethod.GET, request,
+                UserInfo.class);
+        return exchange.getBody();
+    }
+    
+    
 
     private String buildAuthorizationHeader() {
         String clientId = pkceProperties.getClientId();
