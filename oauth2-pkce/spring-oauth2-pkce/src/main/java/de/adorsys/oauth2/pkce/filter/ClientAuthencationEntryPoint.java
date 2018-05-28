@@ -74,7 +74,7 @@ public class ClientAuthencationEntryPoint implements Filter {
             String redirectUri = builder.replacePath(authEndpoint).build().toUriString();
             // Redirect to oauth pkce
             response.addCookie(redirectCookie(targetRequest, redirectUri));
-            response.sendRedirect(authEndpoint + "?"+TokenConstants.REDIRECT_URI_PARAM_NAME+"="+redirectUri);
+            response.sendRedirect(redirectUri + "?"+TokenConstants.REDIRECT_URI_PARAM_NAME+"="+redirectUri);
             return;
         }
 
