@@ -7,6 +7,8 @@ public class UserInfo {
     private String sub;
     private String email;
     private boolean email_verified;
+    private String person_id;
+    
     public String getGiven_name() {
         return given_name;
     }
@@ -43,5 +45,13 @@ public class UserInfo {
     public void setEmail_verified(boolean email_verified) {
         this.email_verified = email_verified;
     }
+	public String getPerson_id() {
+		return person_id;
+	}
+	public void setPerson_id(String person_id) {
+		this.person_id = person_id;
+	}
+    
+    
 
 }

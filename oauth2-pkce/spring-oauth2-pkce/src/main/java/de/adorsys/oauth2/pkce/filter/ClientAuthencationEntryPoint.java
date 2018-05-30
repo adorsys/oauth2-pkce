@@ -63,11 +63,11 @@ public class ClientAuthencationEntryPoint implements Filter {
         if (header != null) {
             chain.doFilter(request, response);
             return;
-        }
-        
-        // If request is a call from swagger ui
-        Optional<String> targetRequestPresent = findTargetRequest(requestUrl); 
-        if(targetRequestPresent.isPresent()){
+        }        
+
+        // If request is a call from auto-protected-pages 
+        Optional<String> targetRequestPresent = findTargetRequest(requestUrl, request);
+        if(targetRequestPresent.isPresent() && readUserAgentStateCookie(request) == null){
             String targetRequest = targetRequestPresent.get();
             ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(request);
             String ext = builder.removePathExtension();
@@ -98,8 +98,15 @@ public class ClientAuthencationEntryPoint implements Filter {
         chain.doFilter(request, response);
     }
 
-    private Optional<String> findTargetRequest(String requestUrl) {
-        return userAgentAutoProtectedPages.stream().filter(s -> StringUtils.endsWithIgnoreCase(requestUrl, s)).findFirst();
+    private Optional<String> findTargetRequest(String requestUrl, HttpServletRequest request) {
+        Optional<String> found = userAgentAutoProtectedPages.stream().filter(s -> StringUtils.endsWithIgnoreCase(requestUrl, s)).findFirst();
+        if(found.isPresent()) return found;
+        return findFromReferer(request);
+    }
+
+    private Optional<String> findFromReferer(HttpServletRequest request) {
+    	String referer = request.getHeader("Referer");
+        return userAgentAutoProtectedPages.stream().filter(s -> StringUtils.startsWithIgnoreCase(referer, s)).findFirst();
     }
 
     private Cookie deleteUserAgentStateCookie() {
