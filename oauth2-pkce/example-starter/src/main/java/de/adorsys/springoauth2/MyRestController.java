@@ -5,13 +5,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+
 @RestController
 public class MyRestController {
 
-
     @GetMapping({ "/user", "/me" })
-    public String user() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return String.format("Hello %s my friend.", (authentication!=null && authentication.getPrincipal()!=null?authentication.getPrincipal().toString():"Unknown"));
+    public Authentication user() {
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 }

@@ -17,61 +17,25 @@ export class UserService {
 
     return principalResponse.map(r => {
       return {
-        name: r.userAuthentication.details.name
+        name: r.credentials.name
       }
     });
   }
 }
 
 interface PrincipalResponse {
-  "authorities": [
-    {
-      "authority": string
-    }
-    ],
-  "details": {
-    "remoteAddress": string,
-    "sessionId": string,
-    "tokenValue": string,
-    "tokenType": "bearer",
-    "decodedDetails"?: any
+  authorities: any[],
+  details: any,
+  authenticated: boolean,
+  principal: string,
+  credentials: {
+    given_name: string,
+    family_name: string,
+    name: string,
+    sub: string,
+    email: string,
+    email_verified: boolean,
+    person_id: any
   },
-  "authenticated": boolean,
-  "userAuthentication": {
-    "authorities": [
-      {
-        "authority": string
-      }
-      ],
-    "details": {
-      "sub": string,
-      "name": string,
-      "preferred_username": string,
-      "given_name": string,
-      "family_name": string,
-      "email": string
-    },
-    "authenticated": boolean,
-    "principal": string,
-    "credentials": string,
-    "name": string
-  },
-  "principal": string,
-  "oauth2Request": {
-    "clientId": string,
-    "scope": [any],
-    "requestParameters"?: any,
-    "resourceIds": [any],
-    "authorities": [any],
-    "approved": boolean,
-    "refresh": boolean,
-    "redirectUri": any,
-    "responseTypes": [any],
-    "extensions": any,
-    "grantType"?: any,
-    "refreshTokenRequest"?: any
-  },
-  "clientOnly": boolean,
-  "credentials": string,
-  "name": string
+  name: string
 }
