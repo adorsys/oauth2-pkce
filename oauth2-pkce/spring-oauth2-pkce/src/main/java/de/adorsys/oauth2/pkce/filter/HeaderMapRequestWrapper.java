@@ -1,13 +1,8 @@
 package de.adorsys.oauth2.pkce.filter;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import java.util.*;
 
 /**
  * @author bwa
@@ -38,9 +33,11 @@ public class HeaderMapRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public String getHeader(String name) {
         String headerValue = super.getHeader(name);
+
         if (headerMap.containsKey(name)) {
             headerValue = headerMap.get(name);
         }
+
         return headerValue;
     }
 
@@ -50,9 +47,8 @@ public class HeaderMapRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public Enumeration<String> getHeaderNames() {
         List<String> names = Collections.list(super.getHeaderNames());
-        for (String name : headerMap.keySet()) {
-            names.add(name);
-        }
+        names.addAll(headerMap.keySet());
+
         return Collections.enumeration(names);
     }
 

@@ -1,27 +1,21 @@
 
 package de.adorsys.oauth2.pkce.filter;
 
-import java.io.IOException;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import de.adorsys.oauth2.pkce.PkceProperties;
+import de.adorsys.oauth2.pkce.service.CookieService;
+import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
+import de.adorsys.oauth2.pkce.service.PkceTokenRequestService.TokenResponse;
+import de.adorsys.oauth2.pkce.util.TokenConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
-import de.adorsys.oauth2.pkce.PkceProperties;
-import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
-import de.adorsys.oauth2.pkce.service.PkceTokenRequestService.TokenResponse;
-import de.adorsys.oauth2.pkce.util.TokenConstants;
+import javax.servlet.*;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Check if a secure cookies is present and then add it to the request header.
@@ -32,13 +26,23 @@ import de.adorsys.oauth2.pkce.util.TokenConstants;
 @Component
 public class CookiesAuthenticationFilter implements Filter {
 
-    @Autowired
-    private PkceTokenRequestService authenticationService;
+    private final PkceTokenRequestService authenticationService;
+    private final PkceProperties pkceProperties;
+    private final CookieService cookieService;
 
     @Autowired
-    private PkceProperties pkceProperties;
+    public CookiesAuthenticationFilter(
+            PkceTokenRequestService authenticationService,
+            PkceProperties pkceProperties,
+            CookieService cookieService
+    ) {
+        this.authenticationService = authenticationService;
+        this.pkceProperties = pkceProperties;
+        this.cookieService = cookieService;
+    }
 
-    // ~ Methods
+
+    // ~ Implementation of Filter interface
     // ========================================================================================================
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -50,11 +54,34 @@ public class CookiesAuthenticationFilter implements Filter {
         if (request.getHeader(TokenConstants.AUTHORIZATION_HEADER_NAME) == null) {
             // Move token from cookie to authorization header if available.
             cookieToAuthHeader(request, response, requestWrapper);
-        } else {
-
         }
+
         chain.doFilter(requestWrapper, response);
     }
+
+    @Override
+    public void init(FilterConfig paramFilterConfig) throws ServletException {
+    }
+
+    @Override
+    public void destroy() {
+    }
+
+    // ~ Protected hook methods
+    // ========================================================================================================
+
+    protected void updateCookiesValueInResponse(HttpServletResponse response, TokenResponse refreshedBearerToken) {
+        String accessTokenToken = refreshedBearerToken != null ? refreshedBearerToken.getAccess_token() : null;
+        String refreshToken = refreshedBearerToken != null ? refreshedBearerToken.getRefresh_token() : null;
+        int expireIn = refreshedBearerToken != null ? refreshedBearerToken.getExpires_in().intValue() : 0;
+        int refreshTokenExpireIn = refreshedBearerToken != null ? refreshedBearerToken.anyRefreshTokenExpireIn().intValue() : 0;
+
+        response.addCookie(createCookie(pkceProperties.getAccessTokenCookieName(), accessTokenToken, expireIn));
+        response.addCookie(createCookie(pkceProperties.getRefreshTokenCookieName(), refreshToken, refreshTokenExpireIn));
+    }
+
+    // ~ Private methods
+    // ========================================================================================================
 
     private void cookieToAuthHeader(HttpServletRequest request, HttpServletResponse response, HeaderMapRequestWrapper requestWrapper) {
         String accessToken = null;
@@ -64,7 +91,7 @@ public class CookiesAuthenticationFilter implements Filter {
         if (accessTokenCookie == null || StringUtils.isBlank(accessTokenCookie.getValue())) {
             Cookie refreshTokenCookie = WebUtils.getCookie(request, pkceProperties.getRefreshTokenCookieName());
             if (refreshTokenCookie != null && StringUtils.isNotBlank(refreshTokenCookie.getValue())) {
-                accessToken = mightRefreshAccessToken(request, response, refreshTokenCookie.getValue());
+                accessToken = mightRefreshAccessToken(response, refreshTokenCookie.getValue());
             }
         } else {
             accessToken = accessTokenCookie.getValue();
@@ -76,39 +103,14 @@ public class CookiesAuthenticationFilter implements Filter {
         }
     }
 
-    private String mightRefreshAccessToken(HttpServletRequest request, HttpServletResponse response, String refreshToken) {
-        TokenResponse newBearerToken = authenticationService.refreshAccessToken(refreshToken);
-        updateCookiesValueInResponse(response, newBearerToken);
-        return newBearerToken != null ? newBearerToken.getAccess_token() : null;
-    }
+    private String mightRefreshAccessToken(HttpServletResponse response, String refreshToken) {
+        TokenResponse refreshedBearerToken = authenticationService.refreshAccessToken(refreshToken);
+        updateCookiesValueInResponse(response, refreshedBearerToken);
 
-    protected void updateCookiesValueInResponse(HttpServletResponse response, TokenResponse newBearerToken) {
-        String accessTokenToken = newBearerToken != null ? newBearerToken.getAccess_token() : null;
-        String refreshToken = newBearerToken != null ? newBearerToken.getRefresh_token() : null;
-        int expireIn = newBearerToken != null ? newBearerToken.getExpires_in().intValue() : 0;
-        int refreshTokenExpireIn = newBearerToken != null ? newBearerToken.anyRefreshTokenExpireIn().intValue() : 0;
-
-        response.addCookie(createCookie(pkceProperties.getAccessTokenCookieName(), accessTokenToken, expireIn));
-        response.addCookie(createCookie(pkceProperties.getRefreshTokenCookieName(), refreshToken, refreshTokenExpireIn));
+        return refreshedBearerToken != null ? refreshedBearerToken.getAccess_token() : null;
     }
 
     private Cookie createCookie(String name, String token, int expiration) {
-        Cookie cookie = new Cookie(name, token);
-
-        cookie.setSecure(pkceProperties.getSecureCookie());
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(expiration);
-        return cookie;
+        return cookieService.creationCookie(name, token, "/", expiration);
     }
-
-    @Override
-    public void init(FilterConfig paramFilterConfig) throws ServletException {
-        
-    }
-
-    @Override
-    public void destroy() {
-    }
-
 }

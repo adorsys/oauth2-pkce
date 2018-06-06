@@ -7,7 +7,6 @@ import de.adorsys.oauth2.pkce.basetypes.Nonce;
 import de.adorsys.oauth2.pkce.basetypes.State;
 import de.adorsys.oauth2.pkce.context.Oauth2PkceFactory;
 import de.adorsys.oauth2.pkce.util.TokenConstants;
-
 import org.springframework.web.util.UriComponentsBuilder;
 
 public class LoginRedirectService {

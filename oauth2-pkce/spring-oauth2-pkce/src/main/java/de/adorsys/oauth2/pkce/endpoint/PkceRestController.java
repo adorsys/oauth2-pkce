@@ -1,11 +1,11 @@
 package de.adorsys.oauth2.pkce.endpoint;
 
-import java.io.IOException;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import de.adorsys.oauth2.pkce.PkceProperties;
+import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
+import de.adorsys.oauth2.pkce.service.CookieService;
+import de.adorsys.oauth2.pkce.service.LoginRedirectService;
+import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
+import de.adorsys.oauth2.pkce.util.TokenConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,12 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.WebUtils;
 
-import de.adorsys.oauth2.pkce.PkceProperties;
-import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
-import de.adorsys.oauth2.pkce.service.CookieService;
-import de.adorsys.oauth2.pkce.service.LoginRedirectService;
-import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
-import de.adorsys.oauth2.pkce.util.TokenConstants;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @RestController("Oauth Endpoint")
 //@RequestMapping set with de.adorsys.oauth2.pkce.WebConfig
@@ -28,16 +26,19 @@ public class PkceRestController {
     private final PkceTokenRequestService pkceTokenRequestService;
     private final LoginRedirectService loginRedirectService;
     private final PkceProperties pkceProperties;
+    private final CookieService cookieService;
 
     @Autowired
     public PkceRestController(
             PkceTokenRequestService pkceTokenRequestService,
             LoginRedirectService loginRedirectService,
-            PkceProperties pkceProperties
+            PkceProperties pkceProperties,
+            CookieService cookieService
     ) {
         this.pkceTokenRequestService = pkceTokenRequestService;
         this.loginRedirectService = loginRedirectService;
         this.pkceProperties = pkceProperties;
+        this.cookieService = cookieService;
     }
 
     @GetMapping(params = TokenConstants.REDIRECT_URI_PARAM_NAME)
@@ -93,21 +94,17 @@ public class PkceRestController {
             response.sendRedirect(clientDisplayPage.toString());
         }
     }
-    
-    @Autowired
-    private CookieService cookieService;
 
     // Cookie not deleted. they expire.
     private Cookie createTokenCookie(String name, String token, Long expiration) {
         return cookieService.creationCookie(name, token, "/", expiration.intValue());    	
     }
 
-    // 
     private Cookie deleteCodeVerifierCookie() {
         return cookieService.deletionCookie(pkceProperties.getCodeVerifierCookieName(), pkceProperties.getAuthEndpoint());
     }
 
     private Cookie createCodeVerifierCookie(CodeVerifier codeVerifier) {
-        return cookieService.creationCookie(pkceProperties.getCodeVerifierCookieName(), codeVerifier.getValue(), pkceProperties.getAuthEndpoint(), 3600);
+        return cookieService.creationCookieWithDefaultDuration(pkceProperties.getCodeVerifierCookieName(), codeVerifier.getValue(), pkceProperties.getAuthEndpoint());
     }
 }

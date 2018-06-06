@@ -1,20 +1,15 @@
 package de.adorsys.oauth2.pkce.service;
 
-import java.time.Instant;
-import java.util.Base64;
-import java.util.Date;
-
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import de.adorsys.oauth2.pkce.PkceProperties;
+import de.adorsys.oauth2.pkce.util.TokenConstants;
+import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import de.adorsys.oauth2.pkce.PkceProperties;
-import de.adorsys.oauth2.pkce.util.TokenConstants;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.Date;
 
 public class PkceTokenRequestService {
 
@@ -74,13 +69,17 @@ public class PkceTokenRequestService {
     public UserInfo userInfo(String accessToken){
         HttpHeaders headers = new HttpHeaders();
         headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Bearer " + accessToken);
+
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(null, headers);
-        ResponseEntity<UserInfo> exchange = restTemplate.exchange(pkceProperties.getUserInfoUri(), HttpMethod.GET, request,
-                UserInfo.class);
+
+        ResponseEntity<UserInfo> exchange = restTemplate.exchange(
+                pkceProperties.getUserInfoUri(),
+                HttpMethod.GET, request,
+                UserInfo.class
+        );
+
         return exchange.getBody();
     }
-    
-    
 
     private String buildAuthorizationHeader() {
         String clientId = pkceProperties.getClientId();

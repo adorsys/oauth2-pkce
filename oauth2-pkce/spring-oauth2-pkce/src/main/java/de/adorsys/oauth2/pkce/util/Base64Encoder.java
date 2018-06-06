@@ -12,7 +12,7 @@ public class Base64Encoder {
         return toBase64(byteArray.getValue());
     }
 
-    private String toBase64(byte[] bytes) {
+    public String toBase64(byte[] bytes) {
         byte[] encodedBase64InBytes = BASE64_URL_ENCODER.encode(bytes);
 
         return new String(encodedBase64InBytes);

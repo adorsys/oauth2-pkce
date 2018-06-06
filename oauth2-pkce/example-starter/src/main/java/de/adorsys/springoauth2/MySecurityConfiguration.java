@@ -26,10 +26,14 @@ public class MySecurityConfiguration extends WebSecurityConfigurerAdapter {
     private ClientAuthencationEntryPoint clientAuthencationEntryPoint;
     private OpaqueTokenAuthenticationFilter opaqueTokenAuthenticationFilter;
     private PkceProperties pkceProperties;
-    
-    public MySecurityConfiguration(TokenAuthenticationService tokenAuthenticationService,
-            CookiesAuthenticationFilter cookiesAuthenticationFilter, ClientAuthencationEntryPoint clientAuthencationEntryPoint,
-            de.adorsys.springoauth2.OpaqueTokenAuthenticationFilter opaqueTokenAuthenticationFilter, PkceProperties pkceProperties) {
+
+    public MySecurityConfiguration(
+            TokenAuthenticationService tokenAuthenticationService,
+            CookiesAuthenticationFilter cookiesAuthenticationFilter,
+            ClientAuthencationEntryPoint clientAuthencationEntryPoint,
+            de.adorsys.springoauth2.OpaqueTokenAuthenticationFilter opaqueTokenAuthenticationFilter,
+            PkceProperties pkceProperties
+    ) {
         super();
         this.tokenAuthenticationService = tokenAuthenticationService;
         this.cookiesAuthenticationFilter = cookiesAuthenticationFilter;
@@ -56,9 +60,10 @@ public class MySecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
             .csrf()
                 .disable();
+
         http.addFilterBefore(new JWTAuthenticationFilter(tokenAuthenticationService), BasicAuthenticationFilter.class)
-        .addFilterBefore(opaqueTokenAuthenticationFilter, JWTAuthenticationFilter.class)
-        .addFilterBefore(clientAuthencationEntryPoint,OpaqueTokenAuthenticationFilter.class)
-        .addFilterBefore(cookiesAuthenticationFilter, ClientAuthencationEntryPoint.class);
+            .addFilterBefore(opaqueTokenAuthenticationFilter, JWTAuthenticationFilter.class)
+            .addFilterBefore(clientAuthencationEntryPoint, OpaqueTokenAuthenticationFilter.class)
+            .addFilterBefore(cookiesAuthenticationFilter, ClientAuthencationEntryPoint.class);
     }
 }

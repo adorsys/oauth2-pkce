@@ -25,9 +25,9 @@ import de.adorsys.oauth2.pkce.service.UserInfo;
 
 @Component
 public class OpaqueTokenAuthenticationFilter implements Filter {
-    static final String TOKEN_PREFIX = "Bearer ";
-    public static final String HEADER_KEY = "Authorization";
-    
+    private static final String TOKEN_PREFIX = "Bearer ";
+    private static final String HEADER_KEY = "Authorization";
+
     @Autowired
     private PkceTokenRequestService pkceTokenRequestService;
 
@@ -38,6 +38,7 @@ public class OpaqueTokenAuthenticationFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (authentication == null) {
             authentication = getAuthentication((HttpServletRequest) request);
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -47,28 +48,26 @@ public class OpaqueTokenAuthenticationFilter implements Filter {
 
     }
 
-    public Authentication getAuthentication(HttpServletRequest request) {
+    private Authentication getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(HEADER_KEY);
-        if(StringUtils.isBlank(token)) return null;
-        if(!StringUtils.startsWithIgnoreCase(token, "Bearer ")) return null;
+        if (StringUtils.isBlank(token)) return null;
+        if (!StringUtils.startsWithIgnoreCase(token, TOKEN_PREFIX)) return null;
         String accessToken = StringUtils.substringAfterLast(token, " ");
 
-        if(!isOpaqueToken(accessToken)) return null;
-        
+        if (!isOpaqueToken(accessToken)) return null;
+
         UserInfo userInfo = pkceTokenRequestService.userInfo(accessToken);
         // process roles
         List<GrantedAuthority> authorities = new ArrayList<>();
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userInfo.getSub(), userInfo, authorities);
-        return authenticationToken;
+        return new UsernamePasswordAuthenticationToken(userInfo.getSub(), userInfo, authorities);
     }
 
     // First attemp. Count dots. We assume opaque token does not contain dots.
     private boolean isOpaqueToken(String strippedToken) {
-        return StringUtils.countMatches(strippedToken, ".")==0;
+        return StringUtils.countMatches(strippedToken, ".") == 0;
     }
 
     @Override
     public void init(FilterConfig arg0) throws ServletException {
     }
-    
 }

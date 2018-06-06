@@ -1,13 +1,13 @@
 package de.adorsys.oauth2.pkce;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 @ConfigurationProperties(prefix = "pkce")
