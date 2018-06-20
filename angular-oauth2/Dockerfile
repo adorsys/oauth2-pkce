@@ -15,4 +15,5 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 
 EXPOSE 8090
 
-ENTRYPOINT /opt/entrypoint.sh
+ENTRYPOINT ["/opt/entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]
