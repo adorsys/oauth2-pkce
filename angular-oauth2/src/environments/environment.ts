@@ -7,5 +7,6 @@ export const environment = {
   production: false,
   backendUrl: '',
   loginEndpoint: '/oauth2/login',
+  logoutEndpoint: '/oauth2/logout',
   redirectUri: 'http://localhost/token'
 };
