@@ -1,6 +1,9 @@
 package de.adorsys.oauth2.pkce;
 
 import de.adorsys.oauth2.pkce.endpoint.PkceRestController;
+import de.adorsys.oauth2.pkce.endpoint.PkceRestLogoutController;
+import de.adorsys.oauth2.pkce.util.TokenConstants;
+
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 
@@ -20,6 +23,10 @@ public class PkceWebConfig {
     public RequestMappingInfo registerAPI(Object handler, Method method, RequestMappingInfo mapping) {
         return registerAPI(method, mapping, PkceRestController.class, pkceProperties.getAuthEndpoint());
     }
+    
+    public RequestMappingInfo registerLogoutAPI(Object handler, Method method, RequestMappingInfo mapping) {
+        return registerAPI(method, mapping, PkceRestLogoutController.class, TokenConstants.LOGOUT_LINK);
+    }
 
     private <A> RequestMappingInfo registerAPI(Method method, RequestMappingInfo mapping,
             Class<A> controllerClass, String basePath) {
@@ -27,7 +34,7 @@ public class PkceWebConfig {
 
         if(beanType==controllerClass){
             // Replace default pattern
-            PatternsRequestCondition apiPattern = new PatternsRequestCondition(basePath);
+            PatternsRequestCondition apiPattern = new PatternsRequestCondition(basePath);//.combine(mapping.getPatternsCondition());
             
             mapping = new RequestMappingInfo(mapping.getName(), apiPattern, mapping.getMethodsCondition(),
                     mapping.getParamsCondition(), mapping.getHeadersCondition(), mapping.getConsumesCondition(),

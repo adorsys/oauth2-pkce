@@ -58,6 +58,11 @@ public class ClientAuthencationEntryPoint implements Filter {
             chain.doFilter(request, response);
             return;
         }
+        
+        if (StringUtils.endsWith(requestUrl, TokenConstants.LOGOUT_LINK)) {
+        	chain.doFilter(request, response);
+        	return;
+        }
 
         // If request is a call from auto-protected-pages 
         Optional<String> targetRequestPresent = findTargetRequest(requestUrl, request);
