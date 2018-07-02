@@ -10,5 +10,9 @@
   "/me": {
     "target": "http://backend:8888",
     "secure": false
+  },
+  "/oauth2/logout": {
+    "target": "http://backend:8888",
+    "secure": false
   }
 }

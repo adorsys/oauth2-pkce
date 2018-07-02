@@ -30,8 +30,17 @@ public class WebConfig {
                 return new RequestMappingHandlerMapping() {
                     @Override
                     protected void registerHandlerMethod(Object handler, Method method, RequestMappingInfo mapping) {
-                        mapping = pkceWebConfig.registerAPI(handler, method, mapping);
-                        super.registerHandlerMethod(handler, method, mapping);
+                        RequestMappingInfo mapping1 = pkceWebConfig.registerAPI(handler, method, mapping);
+                        if(mapping1 != mapping) {
+                        	super.registerHandlerMethod(handler, method, mapping1);
+                        } else {
+                        	RequestMappingInfo mapping2 = pkceWebConfig.registerLogoutAPI(handler, method, mapping);
+                        	if(mapping2 != mapping) {
+                            	super.registerHandlerMethod(handler, method, mapping1);
+                        	} else {
+                        		super.registerHandlerMethod(handler, method, mapping);
+                        	}
+                        }
                     }
                 };
             }

@@ -10,5 +10,9 @@
   "/me": {
     "target": "http://localhost:8888",
     "secure": false
+  },
+  "/oauth2/logout": {
+    "target": "http://localhost:8888",
+    "secure": false
   }
 }

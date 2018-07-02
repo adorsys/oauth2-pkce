@@ -12,6 +12,7 @@ import de.adorsys.oauth2.pkce.EnableOauth2PkceServer;
 import de.adorsys.oauth2.pkce.PkceProperties;
 import de.adorsys.oauth2.pkce.filter.ClientAuthencationEntryPoint;
 import de.adorsys.oauth2.pkce.filter.CookiesAuthenticationFilter;
+import de.adorsys.oauth2.pkce.util.TokenConstants;
 import de.adorsys.sts.filter.JWTAuthenticationFilter;
 import de.adorsys.sts.token.authentication.TokenAuthenticationService;
 
@@ -50,6 +51,7 @@ public class MySecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
             .authorizeRequests()
                 .antMatchers(pkceProperties.getAuthEndpoint()).permitAll()
+                .antMatchers(TokenConstants.LOGOUT_LINK).permitAll()
                 .anyRequest().authenticated()
                 .and()
             .exceptionHandling()

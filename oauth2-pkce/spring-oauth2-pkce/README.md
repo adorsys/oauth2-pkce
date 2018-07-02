@@ -37,6 +37,7 @@ For example:
         http
             .authorizeRequests()
                 .antMatchers("/oauth/pkce").permitAll()
+                .antMatchers(TokenConstants.LOGOUT_LINK).permitAll()
                 .anyRequest().authenticated()
                 .and()
             .exceptionHandling()

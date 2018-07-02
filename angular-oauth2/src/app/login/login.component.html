@@ -5,10 +5,7 @@
   [class.login_choice_container--unauthenticated]="unauthenticated"
 >
   <div>
-    <!--With Datev IDP: <a [href]="backendUrl + '/login/datev?state=QovdM-QGwUdBR-C5Epdvils5zDM'">click here</a>-->
-    <!--With Datev IDP: <a [href]="backendUrl + '/login/datev'">click here</a>-->
     With Datev IDP: <a [href]="loginUrl">click here</a>
-    <!--With Datev IDP: <a href="#" (click)="login()">click here</a>-->
   </div >
   authenticated: {{authenticated}}
   <div>
@@ -22,6 +19,6 @@
 >
   Logged in as: <span id="user">{{user | json}}</span>
   <div>
-    <button (click)="logout()">Logout</button>
+    <a [href]="logoutUrl">Logout</a>
   </div>
 </div>

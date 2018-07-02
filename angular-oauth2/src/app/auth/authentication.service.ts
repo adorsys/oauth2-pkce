@@ -24,10 +24,6 @@ export class AuthenticationService {
     this.router.navigate([`${environment.backendUrl}${environment.loginEndpoint}`]);
   }
 
-  public logout(): void {
-    this._isAuthenticated = false;
-  }
-
   public exchangeToken(code: string): Observable<void> {
     return this.tokenService.getToken(code).map(
       () => {
