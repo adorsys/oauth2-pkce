@@ -51,12 +51,12 @@ export class LoginComponent implements OnInit {
     return !(this.authenticationService.isAuthenticated);
   }
 
-  public logout() {
-    this.authenticationService.logout();
-  }
-
   public get loginUrl() {
     return `${environment.backendUrl}${environment.loginEndpoint}?redirect_uri=${environment.redirectUri}`;
+  }
+
+  public get logoutUrl() {
+    return `${environment.backendUrl}${environment.logoutEndpoint}`;
   }
 
   public login(): void {

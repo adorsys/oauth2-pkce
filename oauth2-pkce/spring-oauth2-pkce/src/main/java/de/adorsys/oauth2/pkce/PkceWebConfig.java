@@ -34,7 +34,7 @@ public class PkceWebConfig {
 
         if(beanType==controllerClass){
             // Replace default pattern
-            PatternsRequestCondition apiPattern = new PatternsRequestCondition(basePath);//.combine(mapping.getPatternsCondition());
+            PatternsRequestCondition apiPattern = new PatternsRequestCondition(basePath);
             
             mapping = new RequestMappingInfo(mapping.getName(), apiPattern, mapping.getMethodsCondition(),
                     mapping.getParamsCondition(), mapping.getHeadersCondition(), mapping.getConsumesCondition(),
