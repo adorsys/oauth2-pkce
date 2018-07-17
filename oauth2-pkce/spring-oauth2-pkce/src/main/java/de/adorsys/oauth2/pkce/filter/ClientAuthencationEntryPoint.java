@@ -71,8 +71,8 @@ public class ClientAuthencationEntryPoint implements Filter {
         if (targetRequestPresent.isPresent() && !optionalUserAgentStateCookie.isPresent()) {
             String targetRequest = targetRequestPresent.get();
             ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(request);
-            String ext = builder.removePathExtension();
             String redirectUri = builder.replacePath(authEndpoint).build().toUriString();
+
             // Redirect to oauth pkce
             response.addCookie(createRedirectCookie(targetRequest, redirectUri));
             response.sendRedirect(redirectUri + "?" + TokenConstants.REDIRECT_URI_PARAM_NAME + "=" + redirectUri);

@@ -2,11 +2,14 @@
 package de.adorsys.oauth2.pkce.filter;
 
 import de.adorsys.oauth2.pkce.PkceProperties;
+import de.adorsys.oauth2.pkce.exception.UnauthorizedException;
 import de.adorsys.oauth2.pkce.service.CookieService;
 import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
 import de.adorsys.oauth2.pkce.service.PkceTokenRequestService.TokenResponse;
 import de.adorsys.oauth2.pkce.util.TokenConstants;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
@@ -15,6 +18,7 @@ import javax.servlet.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 
 /**
@@ -25,6 +29,8 @@ import java.io.IOException;
 
 @Component
 public class CookiesAuthenticationFilter implements Filter {
+
+    private final Logger logger = LoggerFactory.getLogger(CookiesAuthenticationFilter.class);
 
     private final PkceTokenRequestService authenticationService;
     private final PkceProperties pkceProperties;
@@ -51,12 +57,20 @@ public class CookiesAuthenticationFilter implements Filter {
 
         HeaderMapRequestWrapper requestWrapper = new HeaderMapRequestWrapper(request);
 
-        if (request.getHeader(TokenConstants.AUTHORIZATION_HEADER_NAME) == null) {
-            // Move token from cookie to authorization header if available.
-            cookieToAuthHeader(request, response, requestWrapper);
-        }
+        try {
+            if (request.getHeader(TokenConstants.AUTHORIZATION_HEADER_NAME) == null) {
+                // Move token from cookie to authorization header if available.
+                cookieToAuthHeader(request, response, requestWrapper);
+            }
 
-        chain.doFilter(requestWrapper, response);
+            chain.doFilter(requestWrapper, response);
+        } catch(UnauthorizedException e) {
+            if(logger.isDebugEnabled()) {
+                logger.debug(e.getMessage());
+            }
+
+            ((HttpServletResponse) res).sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+        }
     }
 
     @Override

@@ -1,15 +1,19 @@
 package de.adorsys.oauth2.pkce.service;
 
 import de.adorsys.oauth2.pkce.PkceProperties;
+import de.adorsys.oauth2.pkce.exception.ExceptionFormatter;
+import de.adorsys.oauth2.pkce.exception.UnauthorizedException;
 import de.adorsys.oauth2.pkce.util.TokenConstants;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 
 public class PkceTokenRequestService {
 
@@ -49,7 +53,7 @@ public class PkceTokenRequestService {
         return exchange.getBody();
     }
     
-    public TokenResponse refreshAccessToken(String refreshToken) {
+    public TokenResponse refreshAccessToken(String refreshToken) throws UnauthorizedException {
         HttpHeaders headers = new HttpHeaders();
         headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Basic " + buildAuthorizationHeader());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -60,8 +64,18 @@ public class PkceTokenRequestService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        ResponseEntity<TokenResponse> exchange = restTemplate.exchange(pkceProperties.getAccessTokenUri(), HttpMethod.POST, request,
-                TokenResponse.class);
+        ResponseEntity<TokenResponse> exchange;
+        try {
+            exchange = restTemplate.exchange(
+                    pkceProperties.getAccessTokenUri(),
+                    HttpMethod.POST,
+                    request,
+                    TokenResponse.class
+            );
+
+        } catch(Exception e) {
+            throw new UnauthorizedException(ExceptionFormatter.format(UUID.randomUUID().toString(), e));
+        }
 
         return exchange.getBody();
     }
