@@ -11,8 +11,13 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import de.adorsys.oauth2.pkce.exception.UnauthorizedException;
+import de.adorsys.oauth2.pkce.filter.CookiesAuthenticationFilter;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +33,8 @@ public class OpaqueTokenAuthenticationFilter implements Filter {
     private static final String TOKEN_PREFIX = "Bearer ";
     private static final String HEADER_KEY = "Authorization";
 
+    private final Logger logger = LoggerFactory.getLogger(OpaqueTokenAuthenticationFilter.class);
+
     @Autowired
     private PkceTokenRequestService pkceTokenRequestService;
 
@@ -39,13 +46,20 @@ public class OpaqueTokenAuthenticationFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null) {
-            authentication = getAuthentication((HttpServletRequest) request);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            if (authentication == null) {
+                authentication = getAuthentication((HttpServletRequest) request);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+
+            chain.doFilter(request, response);
+        } catch(UnauthorizedException e) {
+            if(logger.isDebugEnabled()) {
+                logger.debug(e.getMessage());
+            }
+
+            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         }
-
-        chain.doFilter(request, response);
-
     }
 
     private Authentication getAuthentication(HttpServletRequest request) {

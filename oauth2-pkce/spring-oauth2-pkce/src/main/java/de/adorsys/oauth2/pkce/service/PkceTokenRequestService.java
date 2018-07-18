@@ -80,17 +80,22 @@ public class PkceTokenRequestService {
         return exchange.getBody();
     }
     
-    public UserInfo userInfo(String accessToken){
+    public UserInfo userInfo(String accessToken) throws UnauthorizedException {
         HttpHeaders headers = new HttpHeaders();
         headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Bearer " + accessToken);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(null, headers);
 
-        ResponseEntity<UserInfo> exchange = restTemplate.exchange(
-                pkceProperties.getUserInfoUri(),
-                HttpMethod.GET, request,
-                UserInfo.class
-        );
+        ResponseEntity<UserInfo> exchange;
+        try {
+            exchange = restTemplate.exchange(
+                    pkceProperties.getUserInfoUri(),
+                    HttpMethod.GET, request,
+                    UserInfo.class
+            );
+        } catch(Exception e) {
+            throw new UnauthorizedException(ExceptionFormatter.format(UUID.randomUUID().toString(), e));
+        }
 
         return exchange.getBody();
     }
