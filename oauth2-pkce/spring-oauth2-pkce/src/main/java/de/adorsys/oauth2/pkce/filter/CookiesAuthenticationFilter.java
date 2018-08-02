@@ -18,7 +18,6 @@ import javax.servlet.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 
 /**
@@ -52,6 +51,8 @@ public class CookiesAuthenticationFilter implements Filter {
     // ========================================================================================================
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        if(logger.isTraceEnabled()) logger.trace("doFilter start");
+
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
@@ -59,6 +60,8 @@ public class CookiesAuthenticationFilter implements Filter {
 
         try {
             if (request.getHeader(TokenConstants.AUTHORIZATION_HEADER_NAME) == null) {
+                if(logger.isDebugEnabled()) logger.debug("Header value {} is null", TokenConstants.AUTHORIZATION_HEADER_NAME);
+
                 // Move token from cookie to authorization header if available.
                 cookieToAuthHeader(request, response, requestWrapper);
             }
@@ -71,6 +74,8 @@ public class CookiesAuthenticationFilter implements Filter {
 
             ((HttpServletResponse) res).sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         }
+
+        if(logger.isTraceEnabled()) logger.trace("doFilter end");
     }
 
     @Override

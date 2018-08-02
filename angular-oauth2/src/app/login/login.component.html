@@ -5,12 +5,9 @@
   [class.login_choice_container--unauthenticated]="unauthenticated"
 >
   <div>
-    With Datev IDP: <a [href]="loginUrl">click here</a>
+    Login: <a [href]="loginUrl">click here</a>
   </div >
   authenticated: {{authenticated}}
-  <div>
-    With local Keycloak: <a [href]="backendUrl + '/login/keycloak'">click here</a>
-  </div>
 </div>
 <div
   class="login_user_container"

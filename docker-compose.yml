@@ -1,10 +1,38 @@
 version: '3.1'
 services:
+  keycloak:
+    image: "jboss/keycloak:3.2.1.Final"
+    environment:
+      KEYCLOAK_PASSWORD: admin123
+      KEYCLOAK_USER: admin
+    ports:
+    - "8080:8080"
+    - "8787:8787"
+    volumes:
+    - "./.docker/keycloak/data:/opt/jboss/keycloak/standalone/data"
+    networks:
+    - my_network
+    command:
+    - "-b"
+    - "0.0.0.0"
+    - "--debug"
+  post_process:
+    image: adorsys/keycloak-config-cli:v0.2.2
+    depends_on:
+    - keycloak
+    networks:
+    - my_network
+    volumes:
+    - ./keycloak-config:/opt/keycloak-config-cli/configs
+    environment:
+    - KEYCLOAK_URL=http://keycloak:8080/auth
+    - KEYCLOAK_ADMIN=admin
+    - KEYCLOAK_ADMIN_PASSWORD=admin123
   backend:
     build: ./oauth2-pkce/example-starter
     image: local/spring-oauth2:latest
     environment:
-      - SPRING_APPLICATION_JSON={"pkce":{"authorization-header":"Basic dXNlcjpwYXNzd29yZA==","client-id":"8eaf2f91-c9cb-4567-8cb6-84d874de48ab","client-secret":"my_super_secret_client_secret","access-token-uri":"https://my.idp/token","user-authorization-uri":"https://my.idp/authorize","user-info-uri":"https://my.idp/userinfo","token-name":"oauth_token","scope":"openid+profile","redirect-uri":"http://localhost/token","code-challenge-method":"S256","response-type":"code+id_token","cookie-name":"bearer_token","secure-cookie":false}}
+      - SPRING_APPLICATION_JSON={"server":{"port":8888},"pkce":{"client-id":"moped-client","client-secret":"939d28bd-8d06-4cd3-8324-10b4c7b12852","access-token-uri":"http://keycloak:8080/auth/realms/moped/protocol/openid-connect/token","user-authorization-uri":"http://localhost:8080/auth/realms/moped/protocol/openid-connect/auth","user-info-uri":"https://keycloak:8080/auth/realms/moped/protocol/openid-connect/userinfo","redirect-uri":"http://localhost/token"}, "sts":{"authservers":[{"name":"local keycloak","iss-url":"http://localhost:8080/auth/realms/moped","jwks-url":"http://keycloak:8080/auth/realms/moped/protocol/openid-connect/certs"}]},"logging.level":{"de.adorsys":"trace"}}
     ports:
     - "8888:8888"
     networks:

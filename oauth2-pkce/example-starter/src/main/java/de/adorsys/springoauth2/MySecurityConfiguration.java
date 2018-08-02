@@ -1,5 +1,8 @@
 package de.adorsys.springoauth2;
 
+import de.adorsys.oauth2.pkce.filter.OpaqueTokenAuthenticationFilter;
+import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,18 +35,16 @@ public class MySecurityConfiguration extends WebSecurityConfigurerAdapter {
             TokenAuthenticationService tokenAuthenticationService,
             CookiesAuthenticationFilter cookiesAuthenticationFilter,
             ClientAuthencationEntryPoint clientAuthencationEntryPoint,
-            de.adorsys.springoauth2.OpaqueTokenAuthenticationFilter opaqueTokenAuthenticationFilter,
+            PkceTokenRequestService pkceTokenRequestService,
             PkceProperties pkceProperties
     ) {
         super();
         this.tokenAuthenticationService = tokenAuthenticationService;
         this.cookiesAuthenticationFilter = cookiesAuthenticationFilter;
         this.clientAuthencationEntryPoint = clientAuthencationEntryPoint;
-        this.opaqueTokenAuthenticationFilter = opaqueTokenAuthenticationFilter;
+        this.opaqueTokenAuthenticationFilter = new OpaqueTokenAuthenticationFilter(pkceTokenRequestService);
         this.pkceProperties = pkceProperties;
     }
-
-
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

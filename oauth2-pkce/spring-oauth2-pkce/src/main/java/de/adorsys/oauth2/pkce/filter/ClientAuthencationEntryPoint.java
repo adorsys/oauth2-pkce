@@ -7,6 +7,8 @@ import de.adorsys.oauth2.pkce.service.CookieService;
 import de.adorsys.oauth2.pkce.util.Base64Encoder;
 import de.adorsys.oauth2.pkce.util.TokenConstants;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -21,12 +23,11 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 @Component
 public class ClientAuthencationEntryPoint implements Filter {
 
-    private static final Logger LOGGER = Logger.getLogger(ClientAuthencationEntryPoint.class.getName());
+    private final Logger logger = LoggerFactory.getLogger(ClientAuthencationEntryPoint.class);
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Base64Encoder base64Encoder = new Base64Encoder();
@@ -46,6 +47,8 @@ public class ClientAuthencationEntryPoint implements Filter {
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        if(logger.isTraceEnabled()) logger.trace("doFilter start");
+
         // swagger-ui.html, Referer, redirec-uri for app.
         // oauth/pkce
         HttpServletRequest request = (HttpServletRequest) req;
@@ -55,6 +58,8 @@ public class ClientAuthencationEntryPoint implements Filter {
 
         String header = request.getHeader(TokenConstants.AUTHORIZATION_HEADER_NAME);
         if (header != null) {
+            if(logger.isDebugEnabled()) logger.debug("Header value {} is null", TokenConstants.AUTHORIZATION_HEADER_NAME);
+
             chain.doFilter(request, response);
             return;
         }
@@ -98,6 +103,8 @@ public class ClientAuthencationEntryPoint implements Filter {
         }
 
         chain.doFilter(request, response);
+
+        if(logger.isTraceEnabled()) logger.trace("doFilter end");
     }
 
     private Optional<String> findTargetRequest(String requestUrl, HttpServletRequest request) {
@@ -139,8 +146,7 @@ public class ClientAuthencationEntryPoint implements Filter {
             UserAgentStateCookie userAgentState = objectMapper.readValue(decoded, UserAgentStateCookie.class);
             return Optional.of(userAgentState);
         } catch (IOException e) {
-            LOGGER.severe(e.getMessage());
-            // Log exception
+            if(logger.isDebugEnabled()) logger.debug(e.getMessage());
             return Optional.empty();
         }
     }

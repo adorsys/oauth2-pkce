@@ -1,0 +1,25 @@
+pkce:
+  scope: openid
+  code-challenge-method: S256
+  response-type: code
+  secure-cookie: false
+  auth-endpoint: /oauth2/login
+
+  user-agent-auto-protected-pages: /swagger-ui.html,/user,/me,http://localhost:4200/login
+
+  refresh-token-cookie-name: refresh_token
+  access-token-cookie-name: access_token
+  code-verifier-cookie-name: code_verifier
+  user-agent-state-cookie-name: user_agent_state
+
+#logging.level:
+#  de.adorsys: trace
+#  de.adorsys.oauth2: trace
+#  de.adorsys.oauth2.pkce.service.PkceTokenRequestService: trace
+#  de.adorsys.oauth2.pkce.filter.CookiesAuthenticationFilter: trace
+#  de.adorsys.oauth2.pkce.filter.ClientAuthencationEntryPoint: trace
+#  de.adorsys.oauth2.pkce.filter.OpaqueTokenAuthenticationFilter: trace
+#  de.adorsys.sts: trace
+#  de.adorsys.sts.filter.JWTAuthenticationFilter: trace
+#  de.adorsys.sts.token.authentication.TokenAuthenticationService: trace
+#  de.adorsys.sts.token.authentication.LoggingBearerTokenValidator: trace

@@ -23,14 +23,12 @@ public class PkceProperties {
     private String responseType;
     private Boolean secureCookie = true;
     private String authEndpoint;
-    // List of requestUrl that lead to auto trigerring auth
+    // List of requestUrl that lead to auto trigger auth
     private String userAgentAutoProtectedPages;
 
     private String accessTokenCookieName;
     private String refreshTokenCookieName;
-    // code_verifier
     private String codeVerifierCookieName;
-    // =user_agent_state
     private String userAgentStateCookieName;
 
     public String getClientId() {

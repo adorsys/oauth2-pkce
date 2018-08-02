@@ -4,10 +4,11 @@ import de.adorsys.oauth2.pkce.PkceProperties;
 import de.adorsys.oauth2.pkce.exception.ExceptionFormatter;
 import de.adorsys.oauth2.pkce.exception.UnauthorizedException;
 import de.adorsys.oauth2.pkce.util.TokenConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
@@ -16,6 +17,8 @@ import java.util.Date;
 import java.util.UUID;
 
 public class PkceTokenRequestService {
+
+    private final Logger logger = LoggerFactory.getLogger(PkceTokenRequestService.class);
 
     private static final Base64.Encoder BASE_64 = Base64.getEncoder();
 
@@ -31,6 +34,8 @@ public class PkceTokenRequestService {
     }
 
     public TokenResponse requestToken(String code, String codeVerifier, String redirectUri) {
+        if(logger.isTraceEnabled()) logger.trace("Request tokens for code {}, code-verifier {}, redirect-uri {}", code, codeVerifier, redirectUri);
+
         HttpHeaders headers = new HttpHeaders();
         headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Basic " + buildAuthorizationHeader());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -50,10 +55,14 @@ public class PkceTokenRequestService {
                 TokenResponse.class
         );
 
+        if(logger.isTraceEnabled()) logger.trace("Requested tokens for code {}, code-verifier {}, redirect-uri {} -> {}", code, codeVerifier, redirectUri, exchange.getBody());
+
         return exchange.getBody();
     }
     
     public TokenResponse refreshAccessToken(String refreshToken) throws UnauthorizedException {
+        if(logger.isTraceEnabled()) logger.trace("Refresh access-token for refresh-token {}", refreshToken);
+
         HttpHeaders headers = new HttpHeaders();
         headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Basic " + buildAuthorizationHeader());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -74,15 +83,22 @@ public class PkceTokenRequestService {
             );
 
         } catch(Exception e) {
-            throw new UnauthorizedException(ExceptionFormatter.format(UUID.randomUUID().toString(), e));
+            UUID uuid = UUID.randomUUID();
+            String message = ExceptionFormatter.format(uuid.toString(), e);
+
+            if(logger.isDebugEnabled()) logger.debug("Cannot refresh access-token. message: {}", message, e);
+
+            throw new UnauthorizedException(message, e);
         }
 
         return exchange.getBody();
     }
     
     public UserInfo userInfo(String accessToken) throws UnauthorizedException {
+        if(logger.isTraceEnabled()) logger.trace("Get user info for access-token {}", accessToken);
+
         HttpHeaders headers = new HttpHeaders();
-        headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Bearer " + accessToken);
+        headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, TokenConstants.AUTHORIZATION_HEADER_TOKEN_PREFIX + accessToken);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(null, headers);
 
@@ -94,7 +110,12 @@ public class PkceTokenRequestService {
                     UserInfo.class
             );
         } catch(Exception e) {
-            throw new UnauthorizedException(ExceptionFormatter.format(UUID.randomUUID().toString(), e));
+            UUID uuid = UUID.randomUUID();
+            String message = ExceptionFormatter.format(uuid.toString(), e);
+
+            if(logger.isDebugEnabled()) logger.debug("Cannot get user-info. message: {}", message, e);
+
+            throw new UnauthorizedException(message, e);
         }
 
         return exchange.getBody();
