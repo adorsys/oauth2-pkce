@@ -1,4 +1,4 @@
 #!/bin/sh
 set -e
 
-mvn clean package
+mvn clean package -U
