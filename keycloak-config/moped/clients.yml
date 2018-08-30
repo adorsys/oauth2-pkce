@@ -25,16 +25,3 @@
   useTemplateConfig: false
   useTemplateScope: false
   useTemplateMappers: false
-#  protocolMappers:
-#      - name: Custom Claim Mapper
-#        protocol: openid-connect
-#        protocolMapper: custom-claim-mapper
-#        consentRequired: true
-#        consentText: ""
-#        config:
-#            userinfo.token.claim: 'true'
-#            user.attribute: firstName
-#            id.token.claim: 'true'
-#            access.token.claim: 'true'
-#            claim.name: given_name
-#            jsonType.label: String

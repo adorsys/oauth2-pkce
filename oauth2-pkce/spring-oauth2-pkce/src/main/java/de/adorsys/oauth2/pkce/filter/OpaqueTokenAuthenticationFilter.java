@@ -80,7 +80,7 @@ public class OpaqueTokenAuthenticationFilter implements Filter {
         String accessToken = StringUtils.substringAfterLast(token, " ");
 
         if (!isOpaqueToken(accessToken)){
-            if(logger.isDebugEnabled()) logger.debug("access-token {} is no opaque-token", accessToken);
+            if(logger.isDebugEnabled()) logger.debug("access-token is no opaque-token");
             return null;
         }
 
