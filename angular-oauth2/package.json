@@ -1,6 +1,6 @@
 {
   "name": "angular-oauth2",
-  "version": "0.13.0-SNAPSHOT",
+  "version": "0.13.0",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
