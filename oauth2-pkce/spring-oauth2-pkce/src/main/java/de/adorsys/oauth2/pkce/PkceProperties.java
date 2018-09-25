@@ -30,6 +30,7 @@ public class PkceProperties {
     private String refreshTokenCookieName;
     private String codeVerifierCookieName;
     private String userAgentStateCookieName;
+    private String userAgentPermittedAll;
 
     public String getClientId() {
         return clientId;
@@ -155,5 +156,20 @@ public class PkceProperties {
     public void setUserAgentStateCookieName(String userAgentStateCookieName) {
         this.userAgentStateCookieName = userAgentStateCookieName;
     }
+
+	public String getUserAgentPermittedAll() {
+		return userAgentPermittedAll;
+	}
+
+	public void setUserAgentPermittedAll(String userAgentPermittedAll) {
+		this.userAgentPermittedAll = userAgentPermittedAll;
+	}
+
+	public List<String> userAgentPermittedAll() {
+		if(StringUtils.isBlank(userAgentPermittedAll)) return Collections.emptyList();
+        return Arrays.asList(userAgentPermittedAll.split(","));
+	}
+    
+    
     
 }
