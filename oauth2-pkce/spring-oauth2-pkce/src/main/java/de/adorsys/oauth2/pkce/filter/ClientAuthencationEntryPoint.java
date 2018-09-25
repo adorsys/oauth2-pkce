@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class ClientAuthencationEntryPoint implements Filter {
@@ -39,13 +40,21 @@ public class ClientAuthencationEntryPoint implements Filter {
     private PkceProperties pkceProperties;
 
     private List<String> userAgentAutoProtectedPages;
-
+    private List<String> userAgentPermittedAll;
     @PostConstruct
     public void postConstruct() {
         userAgentAutoProtectedPages = pkceProperties.userAgentAutoProtectedPages();
+        userAgentPermittedAll = pkceProperties.userAgentPermittedAll();
+        assertValueNotIncludedTwice(userAgentPermittedAll, userAgentAutoProtectedPages);
     }
 
-    @Override
+    private void assertValueNotIncludedTwice(List<String> userAgentPermittedAll,
+			List<String> userAgentAutoProtectedPages) {
+    	List<String> intersection = userAgentPermittedAll.stream().filter(userAgentAutoProtectedPages::contains).collect(Collectors.toList());
+    	if(!intersection.isEmpty()) throw new IllegalStateException("Duplicated url mapping. Cannot protect and permit an url at the same time");
+	}
+
+	@Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         if(logger.isTraceEnabled()) logger.trace("doFilter start");
 
@@ -68,7 +77,13 @@ public class ClientAuthencationEntryPoint implements Filter {
         	chain.doFilter(request, response);
         	return;
         }
-
+        logger.debug(requestUrl);
+        // If request is a call from permitted all url
+        Optional<String> permittedUrl = findPermittedUrl(requestUrl, request);
+        if(permittedUrl.isPresent()) {
+        	chain.doFilter(request, response);
+        	return;
+        }
         // If request is a call from auto-protected-pages 
         Optional<String> targetRequestPresent = findTargetRequest(requestUrl, request);
         Optional<UserAgentStateCookie> optionalUserAgentStateCookie = readUserAgentStateCookie(request);
@@ -107,7 +122,12 @@ public class ClientAuthencationEntryPoint implements Filter {
         if(logger.isTraceEnabled()) logger.trace("doFilter end");
     }
 
-    private Optional<String> findTargetRequest(String requestUrl, HttpServletRequest request) {
+    private Optional<String> findPermittedUrl(String requestUrl, HttpServletRequest request) {
+    	Optional<String> permitted = userAgentPermittedAll.stream().filter(val -> StringUtils.endsWithIgnoreCase(requestUrl, val)).findFirst();
+    	return permitted;
+	}
+
+	private Optional<String> findTargetRequest(String requestUrl, HttpServletRequest request) {
         Optional<String> found = userAgentAutoProtectedPages.stream().filter(s -> StringUtils.endsWithIgnoreCase(requestUrl, s)).findFirst();
         if (found.isPresent()) return found;
         return findFromReferer(request);
