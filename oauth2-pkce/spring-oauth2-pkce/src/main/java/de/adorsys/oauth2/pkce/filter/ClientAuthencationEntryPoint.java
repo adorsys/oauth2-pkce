@@ -134,7 +134,7 @@ public class ClientAuthencationEntryPoint implements Filter {
     }
 
     private Optional<String> findFromReferer(HttpServletRequest request) {
-        String referer = request.getHeader("Referer");
+        String referer = request.getHeader(TokenConstants.REFERER_HEADER_KEYWORD);
         return userAgentAutoProtectedPages.stream().filter(s -> StringUtils.startsWithIgnoreCase(referer, s)).findFirst();
     }
 

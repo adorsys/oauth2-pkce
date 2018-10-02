@@ -1,13 +1,13 @@
 package de.adorsys.oauth2.pkce;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 @Component
 @ConfigurationProperties(prefix = "pkce")
@@ -31,6 +31,7 @@ public class PkceProperties {
     private String codeVerifierCookieName;
     private String userAgentStateCookieName;
     private String userAgentPermittedAll;
+    private String ssoLogoutUri;
 
     public String getClientId() {
         return clientId;
@@ -169,7 +170,14 @@ public class PkceProperties {
 		if(StringUtils.isBlank(userAgentPermittedAll)) return Collections.emptyList();
         return Arrays.asList(userAgentPermittedAll.split(","));
 	}
-    
-    
+
+	public String getSsoLogoutUri() {
+		return ssoLogoutUri;
+	}
+
+	public void setSsoLogoutUri(String ssoLogoutUri) {
+		this.ssoLogoutUri = ssoLogoutUri;
+	}
+	
     
 }
