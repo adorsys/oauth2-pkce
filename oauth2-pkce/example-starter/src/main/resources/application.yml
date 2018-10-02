@@ -11,6 +11,7 @@ pkce:
   access-token-cookie-name: access_token
   code-verifier-cookie-name: code_verifier
   user-agent-state-cookie-name: user_agent_state
+  user-agent-permitted-all: /pop
 
 #logging.level:
 #  de.adorsys: trace

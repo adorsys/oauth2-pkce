@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.adorsys.oauth2.pkce.PkceProperties;
@@ -35,16 +36,19 @@ public class PkceRestLogoutController {
     }
     
     @GetMapping(path = {TokenConstants.LOGOUT_LINK})
-    public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    public void logout(HttpServletRequest request, HttpServletResponse response,
+    		@RequestParam(name = TokenConstants.REDIRECT_URI_PARAM_NAME, required=false) String redirectUri) throws IOException{
     	LOG.debug("started logout(HttpServletRequest request)");
     	response.addCookie(cookieService.deletionCookie(pkceProperties.getAccessTokenCookieName(), "/"));
     	response.addCookie(cookieService.deletionCookie(pkceProperties.getRefreshTokenCookieName(), "/"));
-
-    	String referer = request.getHeader("Referer");
+    	if(StringUtils.isBlank(redirectUri)) redirectUri = request.getHeader(TokenConstants.REFERER_HEADER_KEYWORD);
+    	
     	LOG.debug("finished logout(HttpServletRequest request, HttpServletResponse response)");
-    	if(StringUtils.isNotBlank(referer)) {
-    		response.sendRedirect(referer);
+    	StringBuilder ssoLogoutUri = new StringBuilder(pkceProperties.getSsoLogoutUri());
+    	if(StringUtils.isNotBlank(redirectUri)) {
+    		ssoLogoutUri.append("?"+TokenConstants.REDIRECT_URI_PARAM_NAME+"="+redirectUri);
     	}
+    	response.sendRedirect(ssoLogoutUri.toString());
     }
 
 }
