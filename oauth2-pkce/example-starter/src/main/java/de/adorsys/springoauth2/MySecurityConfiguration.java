@@ -1,8 +1,13 @@
 package de.adorsys.springoauth2;
 
+import de.adorsys.oauth2.pkce.EnableOauth2PkceServer;
+import de.adorsys.oauth2.pkce.PkceProperties;
+import de.adorsys.oauth2.pkce.filter.ClientAuthencationEntryPoint;
+import de.adorsys.oauth2.pkce.filter.CookiesAuthenticationFilter;
 import de.adorsys.oauth2.pkce.filter.OpaqueTokenAuthenticationFilter;
 import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
-import org.springframework.context.annotation.Bean;
+import de.adorsys.sts.filter.JWTAuthenticationFilter;
+import de.adorsys.sts.token.authentication.TokenAuthenticationService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,14 +15,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-
-import de.adorsys.oauth2.pkce.EnableOauth2PkceServer;
-import de.adorsys.oauth2.pkce.PkceProperties;
-import de.adorsys.oauth2.pkce.filter.ClientAuthencationEntryPoint;
-import de.adorsys.oauth2.pkce.filter.CookiesAuthenticationFilter;
-import de.adorsys.oauth2.pkce.util.TokenConstants;
-import de.adorsys.sts.filter.JWTAuthenticationFilter;
-import de.adorsys.sts.token.authentication.TokenAuthenticationService;
 
 @Configuration
 @EnableWebSecurity
@@ -52,7 +49,6 @@ public class MySecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
             .authorizeRequests()
                 .antMatchers(pkceProperties.getAuthEndpoint()).permitAll()
-                .antMatchers(TokenConstants.LOGOUT_LINK).permitAll()
                 .anyRequest().authenticated()
                 .and()
             .exceptionHandling()

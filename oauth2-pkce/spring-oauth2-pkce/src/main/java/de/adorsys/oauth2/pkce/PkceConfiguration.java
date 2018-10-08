@@ -2,6 +2,7 @@ package de.adorsys.oauth2.pkce;
 
 import de.adorsys.oauth2.pkce.context.Oauth2PkceFactory;
 import de.adorsys.oauth2.pkce.service.LoginRedirectService;
+import de.adorsys.oauth2.pkce.service.LogoutRedirectService;
 import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -41,5 +42,10 @@ public class PkceConfiguration {
             Oauth2PkceFactory oauth2PkceFactory
     ) {
         return new LoginRedirectService(pkceProperties, oauth2PkceFactory);
+    }
+
+    @Bean
+    LogoutRedirectService logoutRedirectService() {
+        return new LogoutRedirectService(pkceProperties);
     }
 }

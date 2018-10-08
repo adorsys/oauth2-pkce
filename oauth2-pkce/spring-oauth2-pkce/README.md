@@ -65,6 +65,7 @@ pkce:
   access-token-uri: <The IDP's token endpoint, (like: https://my.idp/token)>
   user-authorization-uri: <The IDP's user-authorization endpoint, (like: https://my.idp/authorize)>
   user-info-uri: <The IDP's user-info endpoint, (like: https://my.idp/userinfo)>
+  logout-uri: <The IDP's logout endpoint, (like: https://my.idp/logout)>
   scope: <The oauth2 scope, (for example: openid+profile)>
   code-challenge-method: <The PKCE challenge method, (default: S256)>
   response-type: <The PKCE response type, (default: code+id_token)>

@@ -44,7 +44,7 @@ public class LoginRedirectService {
 
         LoginRedirect loginRedirect = new LoginRedirect();
         loginRedirect.setCodeVerifier(codeVerifier);
-        loginRedirect.setRedirectUrl(builder.build().toUriString());
+        loginRedirect.setRedirectUrl(builder.toUriString());
 
         return loginRedirect;
     }
