@@ -23,4 +23,6 @@ public interface TokenConstants {
      * @see PkceRestLogoutController#logout(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     String LOGOUT_LINK = "/oauth2/logout";
+
+    String REFERER_HEADER_KEYWORD = "Referer";
 }

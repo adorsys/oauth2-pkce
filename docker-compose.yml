@@ -32,7 +32,7 @@ services:
     build: ./oauth2-pkce/example-starter
     image: local/spring-oauth2:latest
     environment:
-      - SPRING_APPLICATION_JSON={"server":{"port":8888},"pkce":{"client-id":"moped-client","client-secret":"939d28bd-8d06-4cd3-8324-10b4c7b12852","access-token-uri":"http://keycloak:8080/auth/realms/moped/protocol/openid-connect/token","user-authorization-uri":"http://localhost:8080/auth/realms/moped/protocol/openid-connect/auth","user-info-uri":"https://keycloak:8080/auth/realms/moped/protocol/openid-connect/userinfo","redirect-uri":"http://localhost/token"}, "sts":{"authservers":[{"name":"local keycloak","iss-url":"http://localhost:8080/auth/realms/moped","jwks-url":"http://keycloak:8080/auth/realms/moped/protocol/openid-connect/certs"}]},"logging.level":{"de.adorsys":"trace"}}
+      - SPRING_APPLICATION_JSON={"server":{"port":8888},"pkce":{"client-id":"moped-client","client-secret":"939d28bd-8d06-4cd3-8324-10b4c7b12852","access-token-uri":"http://keycloak:8080/auth/realms/moped/protocol/openid-connect/token","user-authorization-uri":"http://localhost:8080/auth/realms/moped/protocol/openid-connect/auth","user-info-uri":"https://keycloak:8080/auth/realms/moped/protocol/openid-connect/userinfo","logout-uri":"http://localhost:8080/auth/realms/moped/protocol/openid-connect/logout","redirect-uri":"http://localhost/token"},"sts":{"authservers":[{"name":"local keycloak","iss-url":"http://localhost:8080/auth/realms/moped","jwks-url":"http://keycloak:8080/auth/realms/moped/protocol/openid-connect/certs"}]},"logging.level":{"de.adorsys":"trace"}}
     ports:
     - "8888:8888"
     networks:

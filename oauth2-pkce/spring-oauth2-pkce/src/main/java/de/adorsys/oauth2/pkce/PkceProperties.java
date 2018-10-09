@@ -18,6 +18,7 @@ public class PkceProperties {
     private String accessTokenUri;
     private String userAuthorizationUri;
     private String userInfoUri;
+    private String logoutUri;
     private String scope;
     private String codeChallengeMethod;
     private String responseType;
@@ -70,6 +71,14 @@ public class PkceProperties {
 
     public void setUserInfoUri(String userInfoUri) {
         this.userInfoUri = userInfoUri;
+    }
+
+    public String getLogoutUri() {
+        return logoutUri;
+    }
+
+    public void setLogoutUri(String logoutUri) {
+        this.logoutUri = logoutUri;
     }
 
     public String getScope() {
