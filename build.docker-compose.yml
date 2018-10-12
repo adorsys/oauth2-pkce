@@ -9,11 +9,10 @@ services:
       - ./oauth2-pkce:/opt/src
       - ./.docker-build/.m2:/root/.m2
   build-frontend:
-    build:
-      context: ./angular-oauth2
-      dockerfile: build.Dockerfile
-    image: local/build__oauth2_frontend:latest
+    image: adorsys/ci-build:latest
     volumes:
       - ./angular-oauth2:/opt/src
-      - ./.docker-build/node_modules:/opt/src/node_modules
-
+    working_dir: /opt/src
+    entrypoint: ""
+    command:
+      - /opt/src/docker/compile/build.cmd.bash
