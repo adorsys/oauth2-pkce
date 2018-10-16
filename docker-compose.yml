@@ -32,25 +32,25 @@ services:
     build: ./oauth2-pkce/example-starter
     image: local/spring-oauth2:latest
     environment:
-      - SPRING_APPLICATION_JSON={"server":{"port":8888},"pkce":{"client-id":"moped-client","client-secret":"939d28bd-8d06-4cd3-8324-10b4c7b12852","access-token-uri":"http://keycloak:8080/auth/realms/moped/protocol/openid-connect/token","user-authorization-uri":"http://localhost:8080/auth/realms/moped/protocol/openid-connect/auth","user-info-uri":"https://keycloak:8080/auth/realms/moped/protocol/openid-connect/userinfo","logout-uri":"http://localhost:8080/auth/realms/moped/protocol/openid-connect/logout","redirect-uri":"http://localhost/token"},"sts":{"authservers":[{"name":"local keycloak","iss-url":"http://localhost:8080/auth/realms/moped","jwks-url":"http://keycloak:8080/auth/realms/moped/protocol/openid-connect/certs"}]},"logging.level":{"de.adorsys":"trace"}}
+      - SPRING_APPLICATION_JSON={"server":{"port":8888},"pkce":{"client-id":"moped-client","client-secret":"939d28bd-8d06-4cd3-8324-10b4c7b12852","access-token-uri":"http://keycloak:8080/auth/realms/moped/protocol/openid-connect/token","user-authorization-uri":"http://localhost:8080/auth/realms/moped/protocol/openid-connect/auth","user-info-uri":"https://keycloak:8080/auth/realms/moped/protocol/openid-connect/userinfo","logout-uri":"http://localhost:8080/auth/realms/moped/protocol/openid-connect/logout","redirect-uri":"http://localhost/token","user-agent-auto-protected-pages":"/swagger-ui.html,/user,/me,http://localhost:4200,http://localhost"},"sts":{"authservers":[{"name":"local keycloak","iss-url":"http://localhost:8080/auth/realms/moped","jwks-url":"http://keycloak:8080/auth/realms/moped/protocol/openid-connect/certs"}]},"logging.level":{"de.adorsys":"trace"}}
     ports:
     - "8888:8888"
     networks:
     - my_network
   frontend:
-    build:
-      context: ./angular-oauth2
-      dockerfile: dev.Dockerfile
+    build: ./angular-oauth2
     image: local/angular-oauth2:latest
-    volumes:
-      - ./angular-oauth2:/opt/src
-      - ./.docker-build/node_modules:/opt/src/node_modules
+    environment:
+      - NG_BACKEND_URL=http://localhost:8888
+      - NG_LOGIN_ENDPOINT=/oauth2/login
+      - NG_LOGOUT_ENDPOINT=/oauth2/logout
+      - NG_REDIRECT_URI=http://localhost/#/token
     depends_on:
     - backend
     links:
     - backend
     ports:
-    - "80:4200"
+    - "80:8080"
     networks:
     - my_network
 networks:

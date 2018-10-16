@@ -1,12 +1,24 @@
 server:
   port: 8888
 
+logging.level:
+  de.adorsys: trace
+  de.adorsys.oauth2: trace
+  de.adorsys.oauth2.pkce.service.PkceTokenRequestService: trace
+  de.adorsys.oauth2.pkce.filter.CookiesAuthenticationFilter: trace
+  de.adorsys.oauth2.pkce.filter.ClientAuthencationEntryPoint: trace
+  de.adorsys.oauth2.pkce.filter.OpaqueTokenAuthenticationFilter: trace
+  de.adorsys.sts: trace
+  de.adorsys.sts.filter.JWTAuthenticationFilter: trace
+  de.adorsys.sts.token.authentication.TokenAuthenticationService: trace
+  de.adorsys.sts.token.authentication.LoggingBearerTokenValidator: trace
+
 pkce:
   client-id: moped-client
   client-secret: 939d28bd-8d06-4cd3-8324-10b4c7b12852
   access-token-uri: http://localhost:8080/auth/realms/moped/protocol/openid-connect/token
   user-authorization-uri: http://localhost:8080/auth/realms/moped/protocol/openid-connect/auth
-  user-info-uri: http://localhost:8080/auth/realms/moped/protocol/openid-connect/userinfo
+  user-info-uri: https://localhost:8080/auth/realms/moped/protocol/openid-connect/userinfo
   logout-uri: http://localhost:8080/auth/realms/moped/protocol/openid-connect/logout
   redirect-uri: http://localhost/token
   user-agent-auto-protected-pages: /swagger-ui.html,/user,/me

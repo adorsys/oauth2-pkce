@@ -1,18 +1,18 @@
 {
   "/oauth2/login": {
-    "target": "http://backend:8888",
+    "target": "http://localhost:8888",
     "secure": false
   },
   "/user": {
-    "target": "http://backend:8888",
+    "target": "http://localhost:8888",
     "secure": false
   },
   "/me": {
-    "target": "http://backend:8888",
+    "target": "http://localhost:8888",
     "secure": false
   },
   "/oauth2/logout": {
-    "target": "http://backend:8888",
+    "target": "http://localhost:8888",
     "secure": false
   }
 }

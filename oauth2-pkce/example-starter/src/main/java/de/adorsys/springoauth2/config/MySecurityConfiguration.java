@@ -1,4 +1,4 @@
-package de.adorsys.springoauth2;
+package de.adorsys.springoauth2.config;
 
 import de.adorsys.oauth2.pkce.EnableOauth2PkceServer;
 import de.adorsys.oauth2.pkce.PkceProperties;

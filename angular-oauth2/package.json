@@ -3,15 +3,15 @@
   "version": "0.15.0-SNAPSHOT",
   "license": "MIT",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve --proxy-config proxy.conf.json",
-    "server": "ng serve --proxy-config proxy.conf.json --port 80",
-    "dev": "ng serve --proxy-config dev.proxy.conf.json --port 4200 --host 0.0.0.0",
-    "build": "ng build --prod",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e",
-    "prod": "ng build --prod"
+    "ng": "./node_modules/@angular/cli/bin/ng",
+    "start": "./node_modules/@angular/cli/bin/ng serve --proxy-config proxy.conf.json",
+    "server": "./node_modules/@angular/cli/bin/ng serve --proxy-config proxy.conf.json --port 80",
+    "dev": "./node_modules/@angular/cli/bin/ng serve --proxy-config dev.proxy.conf.json --port 4200 --host 0.0.0.0 --configuration=local",
+    "build": "./node_modules/@angular/cli/bin/ng build --prod",
+    "test": "./node_modules/@angular/cli/bin/ng test",
+    "lint": "./node_modules/@angular/cli/bin/ng lint",
+    "e2e": "./node_modules/@angular/cli/bin/ng e2e",
+    "prod": "./node_modules/@angular/cli/bin/ng build --configuration=production"
   },
   "private": true,
   "dependencies": {
