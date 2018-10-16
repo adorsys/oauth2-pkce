@@ -1,0 +1,125 @@
+package de.adorsys.oauth2.pkce.endpoint;
+
+import de.adorsys.oauth2.pkce.PkceProperties;
+import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
+import de.adorsys.oauth2.pkce.service.CookieService;
+import de.adorsys.oauth2.pkce.service.LoginRedirectService;
+import de.adorsys.oauth2.pkce.service.UserAgentStateService;
+import de.adorsys.oauth2.pkce.util.TokenConstants;
+import io.swagger.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@Api(value = "OAUTH2 PKCE Login")
+@RestController("OAUTH2 PKCE Login Controller")
+@RequestMapping(path = "${pkce.auth-endpoint:/oauth2/login}")
+public class PkceLoginRestController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PkceLoginRestController.class);
+
+    private final LoginRedirectService loginRedirectService;
+    private final PkceProperties pkceProperties;
+    private final CookieService cookieService;
+    private final UserAgentStateService userAgentStateService;
+
+    @Autowired
+    public PkceLoginRestController(
+            LoginRedirectService loginRedirectService,
+            PkceProperties pkceProperties,
+            CookieService cookieService,
+            UserAgentStateService userAgentStateService
+    ) {
+        this.loginRedirectService = loginRedirectService;
+        this.pkceProperties = pkceProperties;
+        this.cookieService = cookieService;
+        this.userAgentStateService = userAgentStateService;
+    }
+
+    // @formatter:off
+    @ApiOperation(value = "Login with provided redirect-uri", code = 302)
+    @ApiResponses(value = {
+        @ApiResponse(
+            code = HttpServletResponse.SC_FOUND,
+            message = "Redirect to IDP login page",
+            responseHeaders = {
+                @ResponseHeader(
+                    name = "Location",
+                    response = String.class,
+                    description = "Url to login page"
+                ), @ResponseHeader(
+                    name = "Set-Cookie",
+                    response = String.class,
+                    description = TokenConstants.USER_AGENT_STATE_COOKIE_NAME + "=<user-agent-state value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
+                )
+            }
+        )
+    })
+    // @formatter:on
+    @GetMapping(params = TokenConstants.REDIRECT_URI_PARAM_NAME)
+    public void redirectToLoginPageWithRedirectUrl(
+            HttpServletRequest request,
+            @RequestParam(TokenConstants.REDIRECT_URI_PARAM_NAME) String originLocation,
+            HttpServletResponse response
+    ) throws IOException {
+        ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(request);
+        String redirectUri = builder.replacePath(pkceProperties.getTokenEndpoint()).build().toUriString();
+
+        redirectToLogin(originLocation, redirectUri, response);
+    }
+
+    // @formatter:off
+    @ApiOperation(value = "Login without provided redirect-uri", code = 302)
+    @ApiResponses(value = {
+        @ApiResponse(
+            code = HttpServletResponse.SC_FOUND,
+            message = "Redirect to IDP login page",
+            responseHeaders = {
+                @ResponseHeader(
+                    name = "location",
+                    response = String.class,
+                    description = "Url to login page"
+                ), @ResponseHeader(
+                    name = "Set-Cookie",
+                    response = String.class,
+                    description = TokenConstants.USER_AGENT_STATE_COOKIE_NAME + "=<user-agent-state value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
+                )
+            }
+        )
+    })
+    // @formatter:on
+    @GetMapping
+    public void redirectToLoginPageWithReferer(
+            HttpServletRequest request,
+            @RequestHeader(TokenConstants.REFERER_HEADER_KEYWORD) String referer,
+            HttpServletResponse response
+    ) throws IOException {
+        ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(request);
+        String redirectUri = builder.replacePath(pkceProperties.getTokenEndpoint()).build().toUriString();
+
+        redirectToLogin(referer, redirectUri, response);
+    }
+
+    private void redirectToLogin(String originLocation, String redirectUri, HttpServletResponse response) throws IOException {
+        LoginRedirectService.LoginRedirect redirect = loginRedirectService.getRedirect(redirectUri);
+
+        Cookie codeVerifier = createCodeVerifierCookie(redirect.getCodeVerifier());
+        response.addCookie(codeVerifier);
+
+        Cookie userAgentStateCookie = userAgentStateService.createRedirectCookie(originLocation, redirectUri);
+        response.addCookie(userAgentStateCookie);
+
+        response.sendRedirect(redirect.getRedirectUrl());
+    }
+
+    private Cookie createCodeVerifierCookie(CodeVerifier codeVerifier) {
+        return cookieService.creationCookieWithDefaultDuration(TokenConstants.CODE_VERIFIER_COOKIE_NAME, codeVerifier.getValue(), pkceProperties.getTokenEndpoint());
+    }
+}

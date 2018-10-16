@@ -48,8 +48,8 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<spring-boot.version>2.0.1.RELEASE</spring-boot.version>
-		<de.adorsys.crypt.version>0.18.7</de.adorsys.crypt.version>
-		<de.adorsys.sts.version>0.26.3</de.adorsys.sts.version>
+		<de.adorsys.crypt.version>0.21.2</de.adorsys.crypt.version>
+		<de.adorsys.sts.version>0.27.1</de.adorsys.sts.version>
 		<scmBranch />
 		<buildNumber />
 	</properties>
@@ -91,6 +91,11 @@
 				<version>${de.adorsys.sts.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger2</artifactId>
+				<version>2.9.2</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

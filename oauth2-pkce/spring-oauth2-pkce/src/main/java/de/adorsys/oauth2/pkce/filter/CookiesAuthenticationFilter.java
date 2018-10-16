@@ -32,7 +32,6 @@ public class CookiesAuthenticationFilter implements Filter {
     private final Logger logger = LoggerFactory.getLogger(CookiesAuthenticationFilter.class);
 
     private final PkceTokenRequestService authenticationService;
-    private final PkceProperties pkceProperties;
     private final CookieService cookieService;
 
     @Autowired
@@ -42,7 +41,6 @@ public class CookiesAuthenticationFilter implements Filter {
             CookieService cookieService
     ) {
         this.authenticationService = authenticationService;
-        this.pkceProperties = pkceProperties;
         this.cookieService = cookieService;
     }
 
@@ -95,8 +93,8 @@ public class CookiesAuthenticationFilter implements Filter {
         int expireIn = refreshedBearerToken != null ? refreshedBearerToken.getExpires_in().intValue() : 0;
         int refreshTokenExpireIn = refreshedBearerToken != null ? refreshedBearerToken.anyRefreshTokenExpireIn().intValue() : 0;
 
-        response.addCookie(createCookie(pkceProperties.getAccessTokenCookieName(), accessTokenToken, expireIn));
-        response.addCookie(createCookie(pkceProperties.getRefreshTokenCookieName(), refreshToken, refreshTokenExpireIn));
+        response.addCookie(createCookie(TokenConstants.ACCESS_TOKEN_COOKIE_NAME, accessTokenToken, expireIn));
+        response.addCookie(createCookie(TokenConstants.REFRESH_TOKEN_COOKIE_NAME, refreshToken, refreshTokenExpireIn));
     }
 
     // ~ Private methods
@@ -105,10 +103,10 @@ public class CookiesAuthenticationFilter implements Filter {
     private void cookieToAuthHeader(HttpServletRequest request, HttpServletResponse response, HeaderMapRequestWrapper requestWrapper) {
         String accessToken = null;
 
-        Cookie accessTokenCookie = WebUtils.getCookie(request, pkceProperties.getAccessTokenCookieName());
+        Cookie accessTokenCookie = WebUtils.getCookie(request, TokenConstants.ACCESS_TOKEN_COOKIE_NAME);
 
         if (accessTokenCookie == null || StringUtils.isBlank(accessTokenCookie.getValue())) {
-            Cookie refreshTokenCookie = WebUtils.getCookie(request, pkceProperties.getRefreshTokenCookieName());
+            Cookie refreshTokenCookie = WebUtils.getCookie(request, TokenConstants.REFRESH_TOKEN_COOKIE_NAME);
             if (refreshTokenCookie != null && StringUtils.isNotBlank(refreshTokenCookie.getValue())) {
                 accessToken = mightRefreshAccessToken(response, refreshTokenCookie.getValue());
             }

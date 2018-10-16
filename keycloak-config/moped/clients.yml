@@ -13,10 +13,10 @@
   bearerOnly: false
   consentRequired: false
   standardFlowEnabled: true
-  implicitFlowEnabled: true
+  implicitFlowEnabled: false
   directAccessGrantsEnabled: true
-  serviceAccountsEnabled: false
-  authorizationServicesEnabled: false
+  serviceAccountsEnabled: true
+  authorizationServicesEnabled: true
   publicClient: true
   frontchannelLogout: false
   attributes: {}

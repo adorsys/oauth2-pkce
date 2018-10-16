@@ -1,6 +1,7 @@
 package de.adorsys.oauth2.pkce;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -23,15 +24,12 @@ public class PkceProperties {
     private String codeChallengeMethod;
     private String responseType;
     private Boolean secureCookie = true;
-    private String authEndpoint;
-    // List of requestUrl that lead to auto trigger auth
-    private String userAgentAutoProtectedPages;
 
-    private String accessTokenCookieName;
-    private String refreshTokenCookieName;
-    private String codeVerifierCookieName;
-    private String userAgentStateCookieName;
-    private String userAgentPermittedAll;
+    @Value("${pkce.auth-endpoint:/oauth2/login}")
+    private String authEndpoint;
+
+    @Value("${pkce.token-endpoint:/oauth2/token}")
+    private String tokenEndpoint;
 
     public String getClientId() {
         return clientId;
@@ -117,68 +115,7 @@ public class PkceProperties {
         return authEndpoint;
     }
 
-    public void setAuthEndpoint(String authEndpoint) {
-        this.authEndpoint = authEndpoint;
+    public String getTokenEndpoint() {
+        return tokenEndpoint;
     }
-
-    public String getUserAgentAutoProtectedPages() {
-        return userAgentAutoProtectedPages;
-    }
-
-    public void setUserAgentAutoProtectedPages(String userAgentAutoProtectedPages) {
-        this.userAgentAutoProtectedPages = userAgentAutoProtectedPages;
-    }
-    
-    public List<String> userAgentAutoProtectedPages(){
-        if(StringUtils.isBlank(userAgentAutoProtectedPages)) return Collections.emptyList();
-        return Arrays.asList(userAgentAutoProtectedPages.split(","));
-    }
-
-    public String getAccessTokenCookieName() {
-        return accessTokenCookieName;
-    }
-
-    public void setAccessTokenCookieName(String accessTokenCookieName) {
-        this.accessTokenCookieName = accessTokenCookieName;
-    }
-
-    public String getRefreshTokenCookieName() {
-        return refreshTokenCookieName;
-    }
-
-    public void setRefreshTokenCookieName(String refreshTokenCookieName) {
-        this.refreshTokenCookieName = refreshTokenCookieName;
-    }
-
-    public String getCodeVerifierCookieName() {
-        return codeVerifierCookieName;
-    }
-
-    public void setCodeVerifierCookieName(String codeVerifierCookieName) {
-        this.codeVerifierCookieName = codeVerifierCookieName;
-    }
-
-    public String getUserAgentStateCookieName() {
-        return userAgentStateCookieName;
-    }
-
-    public void setUserAgentStateCookieName(String userAgentStateCookieName) {
-        this.userAgentStateCookieName = userAgentStateCookieName;
-    }
-
-	public String getUserAgentPermittedAll() {
-		return userAgentPermittedAll;
-	}
-
-	public void setUserAgentPermittedAll(String userAgentPermittedAll) {
-		this.userAgentPermittedAll = userAgentPermittedAll;
-	}
-
-	public List<String> userAgentPermittedAll() {
-		if(StringUtils.isBlank(userAgentPermittedAll)) return Collections.emptyList();
-        return Arrays.asList(userAgentPermittedAll.split(","));
-	}
-    
-    
-    
 }

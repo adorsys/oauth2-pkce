@@ -4,13 +4,10 @@ pkce:
   response-type: code
   secure-cookie: false
   auth-endpoint: /oauth2/login
+  token-endpoint: /oauth2/token
+  logout-endpoint: /oauth2/logout
 
-  user-agent-auto-protected-pages: /swagger-ui.html,/user,/me,http://localhost:4200/login
-
-  refresh-token-cookie-name: refresh_token
-  access-token-cookie-name: access_token
-  code-verifier-cookie-name: code_verifier
-  user-agent-state-cookie-name: user_agent_state
+  user-agent-auto-protected-pages: /swagger-ui.html,/user,/me,http://localhost:4200/login,http://localhost/login
 
 #logging.level:
 #  de.adorsys: trace
