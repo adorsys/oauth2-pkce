@@ -1,9 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {UserService} from "../user/user.service";
 import {User} from "../user/user";
-import {environment} from "../../environments/environment";
 import {AuthenticationService} from "../auth/authentication.service";
-import {ActivatedRoute} from "@angular/router";
+import {AppConfigService} from "../app.config.service";
 
 @Component({
   selector: 'app-login',
@@ -13,54 +11,46 @@ import {ActivatedRoute} from "@angular/router";
 export class LoginComponent implements OnInit {
 
   public user: User;
+  private _isAuthenticated = false;
 
   constructor(
-    private userService: UserService,
-    private authenticationService: AuthenticationService,
-    private route: ActivatedRoute
+    private appConfigService: AppConfigService,
+    private authenticationService: AuthenticationService
   ) {
   }
 
   ngOnInit() {
-    console.log("login component");
-
-    if(this.authenticationService.isAuthenticated) {
-      this.userService.getUser().subscribe(
-        user => {
-          this.user = user;
-          console.log(user)
-        }
-      );
-    } else {
-      let code = this.route.queryParams['code'];
-      if(code) {
-        this.authenticationService.exchangeToken(code.value);
+    this.authenticationService.isAuthenticated.subscribe(a => {
+      if(a.isAuthenticated) {
+        this._isAuthenticated = a.isAuthenticated;
+        this.user = a.user;
+      } else {
+        this._isAuthenticated = false;
       }
-    }
-  }
-
-  public get backendUrl() {
-    return environment.backendUrl;
+    });
   }
 
   public get authenticated() {
-    return this.authenticationService.isAuthenticated;
+    return this._isAuthenticated;
   }
 
   public get unauthenticated() {
-    return !(this.authenticationService.isAuthenticated);
+    return !(this._isAuthenticated);
   }
 
   public get loginUrl() {
-    return `${environment.backendUrl}${environment.loginEndpoint}?redirect_uri=${environment.redirectUri}`;
+    return `${this.appConfigService.getBackendUrl()}${this.appConfigService.getLoginEndpoint()}`;
+  }
+
+  public get loginUrlWithRedirect() {
+    return `${this.appConfigService.getBackendUrl()}${this.appConfigService.getLoginEndpoint()}?redirect_uri=${this.appConfigService.getRedirectUri()}`;
   }
 
   public get logoutUrl() {
-    return `${environment.backendUrl}${environment.logoutEndpoint}`;
+    return `${this.appConfigService.getBackendUrl()}${this.appConfigService.getLogoutEndpoint()}`;
   }
 
-  public login(): void {
-    console.log("do login");
-    this.authenticationService.login();
+  public get logoutUrlWithRedirect() {
+    return `${this.appConfigService.getBackendUrl()}${this.appConfigService.getLogoutEndpoint()}?redirect_uri=${this.appConfigService.getRedirectUri()}`;
   }
 }

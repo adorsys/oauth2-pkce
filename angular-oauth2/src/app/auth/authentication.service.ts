@@ -1,34 +1,49 @@
 import {Injectable} from '@angular/core';
 import {Observable} from "rxjs/Observable";
-import {TokenService} from "./token.service";
-import "rxjs/add/operator/mergeMap";
-import {environment} from "../../environments/environment";
 import {Router} from "@angular/router";
+import {AppConfigService} from "../app.config.service";
+import {AuthenticatedUser} from "./authenticated-user";
+import {UserService} from "../user/user.service";
+import {catchError} from "rxjs/internal/operators";
 
 @Injectable()
 export class AuthenticationService {
-  public code: String;
-  private _isAuthenticated: boolean = false;
+  private _authenticatedUser: AuthenticatedUser = null;
 
   constructor(
-    private tokenService: TokenService,
+    private appConfigService: AppConfigService,
+    private userService: UserService,
     private router: Router
   ) { }
 
-  public get isAuthenticated(): boolean {
-    return this._isAuthenticated;
+  public get isAuthenticated(): Observable<AuthenticatedUser> {
+    if(this._authenticatedUser == null) {
+      let maybeUser = this.userService.getUser();
+
+      return maybeUser.map(u => {
+        return {
+          isAuthenticated: true,
+          user: u
+        }
+      }).pipe(
+        catchError(this.handleError)
+      );
+    } else {
+      Observable.create(this._authenticatedUser)
+    }
+  }
+
+  private handleError(err): Observable<AuthenticatedUser> {
+    return new Observable((observer) => {
+      observer.next({
+        isAuthenticated: false
+      });
+      observer.complete();
+    });
   }
 
   public login(): void {
-    console.log(`redirect to: ${environment.backendUrl}${environment.loginEndpoint}`);
-    this.router.navigate([`${environment.backendUrl}${environment.loginEndpoint}`]);
-  }
-
-  public exchangeToken(code: string): Observable<void> {
-    return this.tokenService.getToken(code).map(
-      () => {
-        this._isAuthenticated = true;
-      }
-    );
+    const loginUrl = `${this.appConfigService.getBackendUrl()}${this.appConfigService.getLoginEndpoint()}`;
+    this.router.navigate([`${loginUrl}`]);
   }
 }

@@ -34,7 +34,7 @@ public class PkceTokenRequestService {
     }
 
     public TokenResponse requestToken(String code, String codeVerifier, String redirectUri) {
-        if(logger.isTraceEnabled()) logger.trace("Request tokens for code {}, code-verifier {}, redirect-uri {}", code, codeVerifier, redirectUri);
+        if(logger.isTraceEnabled()) logger.trace("Request token start...");
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Basic " + buildAuthorizationHeader());
@@ -55,13 +55,13 @@ public class PkceTokenRequestService {
                 TokenResponse.class
         );
 
-        if(logger.isTraceEnabled()) logger.trace("Requested tokens for code {}, code-verifier {}, redirect-uri {} -> {}", code, codeVerifier, redirectUri, exchange.getBody());
+        if(logger.isTraceEnabled()) logger.trace("Request token finished.");
 
         return exchange.getBody();
     }
     
-    public TokenResponse refreshAccessToken(String refreshToken) throws UnauthorizedException {
-        if(logger.isTraceEnabled()) logger.trace("Refresh access-token for refresh-token {}", refreshToken);
+    public TokenResponse refreshAccessToken(String refreshToken) {
+        if(logger.isTraceEnabled()) logger.trace("Refresh access-token for refresh-token start...");
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Basic " + buildAuthorizationHeader());
@@ -91,11 +91,13 @@ public class PkceTokenRequestService {
             throw new UnauthorizedException(message, e);
         }
 
+        if(logger.isTraceEnabled()) logger.trace("Refresh access-token for refresh-token finished.");
+
         return exchange.getBody();
     }
     
-    public UserInfo userInfo(String accessToken) throws UnauthorizedException {
-        if(logger.isTraceEnabled()) logger.trace("Get user info for access-token {}", accessToken);
+    public UserInfo userInfo(String accessToken) {
+        if(logger.isTraceEnabled()) logger.trace("Get user info for access-token start...");
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, TokenConstants.AUTHORIZATION_HEADER_TOKEN_PREFIX + accessToken);
@@ -117,6 +119,8 @@ public class PkceTokenRequestService {
 
             throw new UnauthorizedException(message, e);
         }
+
+        if(logger.isTraceEnabled()) logger.trace("Get user info for access-token finished.");
 
         return exchange.getBody();
     }

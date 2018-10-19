@@ -5,7 +5,8 @@
   [class.login_choice_container--unauthenticated]="unauthenticated"
 >
   <div>
-    Login: <a [href]="loginUrl">click here</a>
+    Login: <a [href]="loginUrl">click here</a><br/>
+    Login with redirect: <a [href]="loginUrlWithRedirect">click here</a>
   </div >
   authenticated: {{authenticated}}
 </div>
@@ -16,6 +17,7 @@
 >
   Logged in as: <span id="user">{{user | json}}</span>
   <div>
-    <a [href]="logoutUrl">Logout</a>
+    <a [href]="logoutUrl">Logout</a><br/>
+    <a [href]="logoutUrlWithRedirect">Logout with redirect</a>
   </div>
 </div>
