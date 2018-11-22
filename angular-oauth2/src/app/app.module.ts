@@ -7,10 +7,12 @@ import {HttpClientModule} from "@angular/common/http";
 import {RouterModule, Routes} from "@angular/router";
 import {AuthenticationService} from "./auth/authentication.service";
 import {AppConfig} from "./env/app-config";
+import {TokenService} from "./auth/token-service";
 
 const routes: Routes = [
   {path: '', redirectTo: 'login', pathMatch: 'full'},
   {path: 'login', component: LoginComponent},
+  {path: 'token', component: LoginComponent},
   {path: '**', redirectTo: 'login'}
 ];
 
@@ -26,6 +28,7 @@ const routes: Routes = [
   ],
   providers: [
     UserService,
+    TokenService,
     AuthenticationService,
     AppConfig, {
       provide: APP_INITIALIZER,

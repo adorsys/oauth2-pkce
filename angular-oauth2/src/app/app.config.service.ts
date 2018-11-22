@@ -16,6 +16,10 @@ export class AppConfigService {
     return this.appConfig.getValue("NG_LOGIN_ENDPOINT");
   }
 
+  public getTokenEndpoint(): string {
+    return this.appConfig.getValue("NG_TOKEN_ENDPOINT");
+  }
+
   public getLogoutEndpoint(): string {
     return this.appConfig.getValue("NG_LOGOUT_ENDPOINT");
   }

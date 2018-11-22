@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {User} from "../user/user";
 import {AuthenticationService} from "../auth/authentication.service";
 import {AppConfigService} from "../app.config.service";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'app-login',
@@ -15,7 +16,8 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private appConfigService: AppConfigService,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
+    private route: ActivatedRoute
   ) {
   }
 
@@ -26,6 +28,11 @@ export class LoginComponent implements OnInit {
         this.user = a.user;
       } else {
         this._isAuthenticated = false;
+        let code = this.route.queryParams['code'];
+        console.log(code)
+        if(code) {
+          this.authenticationService.exchangeToken(code.value);
+        }
       }
     });
   }

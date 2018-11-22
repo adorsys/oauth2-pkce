@@ -118,7 +118,7 @@ public class PkceTokenRestController {
     })
     // @formatter:on
     @GetMapping(params = {TokenConstants.CODE_REQUEST_PARAMETER_NAME, TokenConstants.REDIRECT_URI_PARAM_NAME})
-    public void getToken(
+    public void getTokenFromCodeWithRedirect(
             @RequestParam(TokenConstants.CODE_REQUEST_PARAMETER_NAME) String code,
             @RequestParam(name = TokenConstants.REDIRECT_URI_PARAM_NAME) String redirectUri,
             @CookieValue(name = TokenConstants.CODE_VERIFIER_COOKIE_NAME) String codeVerifier,
@@ -141,6 +141,7 @@ public class PkceTokenRestController {
         response.addCookie(createTokenCookie(TokenConstants.REFRESH_TOKEN_COOKIE_NAME, bearerToken.getRefresh_token(), bearerToken.anyRefreshTokenExpireIn()));
 
         response.addCookie(deleteCodeVerifierCookie());
+        response.addCookie(deleteCodeVerifierCookieForDeprecatedEndpoint());
 
         response.sendRedirect(originUri);
     }
@@ -153,5 +154,9 @@ public class PkceTokenRestController {
 
     private Cookie deleteCodeVerifierCookie() {
         return cookieService.deletionCookie(TokenConstants.CODE_VERIFIER_COOKIE_NAME, pkceProperties.getTokenEndpoint());
+    }
+
+    private Cookie deleteCodeVerifierCookieForDeprecatedEndpoint() {
+        return cookieService.deletionCookie(TokenConstants.CODE_VERIFIER_COOKIE_NAME, pkceProperties.getAuthEndpoint());
     }
 }
