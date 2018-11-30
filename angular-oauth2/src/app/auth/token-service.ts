@@ -11,8 +11,11 @@ export class TokenService {
     private http: HttpClient
   ) { }
 
-  public getToken(code: string): Observable<void> {
+  public getToken(code: string): Promise<void> {
     let url = `${this.appConfigService.getBackendUrl()}${this.appConfigService.getTokenEndpoint()}?code=${code}&redirect_uri=${this.appConfigService.getRedirectUri()}`;
-    return this.http.get<void>(url);
+
+    console.log(`get ${url}`)
+
+    return this.http.get<void>(url).toPromise();
   }
 }

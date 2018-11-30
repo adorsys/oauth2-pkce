@@ -13,6 +13,7 @@ export class LoginComponent implements OnInit {
 
   public user: User;
   private _isAuthenticated = false;
+  private _code;
 
   constructor(
     private appConfigService: AppConfigService,
@@ -22,19 +23,20 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.authenticationService.isAuthenticated.subscribe(a => {
+    this.authenticationService.isAuthenticated.then(a => {
       if(a.isAuthenticated) {
         this._isAuthenticated = a.isAuthenticated;
         this.user = a.user;
       } else {
         this._isAuthenticated = false;
-        let code = this.route.queryParams['code'];
-        console.log(code)
-        if(code) {
-          this.authenticationService.exchangeToken(code.value);
-        }
+
+        this.readCode();
       }
     });
+  }
+
+  private readCode() {
+    this._code = this.route.snapshot.queryParamMap.get('code');
   }
 
   public get authenticated() {
@@ -59,5 +61,13 @@ export class LoginComponent implements OnInit {
 
   public get logoutUrlWithRedirect() {
     return `${this.appConfigService.getBackendUrl()}${this.appConfigService.getLogoutEndpoint()}?redirect_uri=${this.appConfigService.getRedirectUri()}`;
+  }
+
+  public get getTokenForCodeUrl() {
+    return `${this.appConfigService.getBackendUrl()}${this.appConfigService.getTokenEndpoint()}?code=${this._code}&redirect_uri=${this.appConfigService.getRedirectUri()}`;
+  }
+
+  public get code(): string {
+    return this._code;
   }
 }

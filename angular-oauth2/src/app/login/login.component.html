@@ -5,8 +5,9 @@
   [class.login_choice_container--unauthenticated]="unauthenticated"
 >
   <div>
-    Login: <a [href]="loginUrl">click here</a><br/>
-    Login with redirect: <a [href]="loginUrlWithRedirect">click here</a>
+    <a [href]="loginUrl">Login</a><br/>
+    <a *ngIf="!code" [href]="loginUrlWithRedirect">Login with redirect (get code)</a><br/>
+    <a *ngIf="code" [href]="getTokenForCodeUrl">Login with code</a>
   </div >
   authenticated: {{authenticated}}
 </div>
