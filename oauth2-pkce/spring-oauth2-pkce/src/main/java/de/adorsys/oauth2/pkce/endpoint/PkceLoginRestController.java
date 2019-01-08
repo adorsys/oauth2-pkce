@@ -1,7 +1,7 @@
 package de.adorsys.oauth2.pkce.endpoint;
 
 import de.adorsys.oauth2.pkce.PkceProperties;
-import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
+import de.adorsys.oauth2.pkce.model.CodeVerifier;
 import de.adorsys.oauth2.pkce.service.CookieService;
 import de.adorsys.oauth2.pkce.service.LoginRedirectService;
 import de.adorsys.oauth2.pkce.service.UserAgentStateService;

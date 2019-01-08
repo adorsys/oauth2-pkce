@@ -1,6 +1,6 @@
 package de.adorsys.oauth2.pkce.util;
 
-import de.adorsys.oauth2.pkce.basetypes.ByteArray;
+import de.adorsys.oauth2.pkce.model.ByteArray;
 
 import java.util.Random;
 

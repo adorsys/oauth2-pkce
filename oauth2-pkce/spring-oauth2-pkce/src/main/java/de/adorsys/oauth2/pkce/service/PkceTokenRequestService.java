@@ -3,6 +3,7 @@ package de.adorsys.oauth2.pkce.service;
 import de.adorsys.oauth2.pkce.PkceProperties;
 import de.adorsys.oauth2.pkce.exception.ExceptionFormatter;
 import de.adorsys.oauth2.pkce.exception.UnauthorizedException;
+import de.adorsys.oauth2.pkce.model.UserInfo;
 import de.adorsys.oauth2.pkce.util.TokenConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

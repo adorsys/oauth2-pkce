@@ -1,4 +1,4 @@
-package de.adorsys.oauth2.pkce.service;
+package de.adorsys.oauth2.pkce.model;
 
 public class UserInfo {
     private String given_name;

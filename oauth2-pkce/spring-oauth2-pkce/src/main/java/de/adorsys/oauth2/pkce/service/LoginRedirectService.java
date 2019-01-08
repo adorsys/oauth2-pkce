@@ -1,11 +1,11 @@
 package de.adorsys.oauth2.pkce.service;
 
 import de.adorsys.oauth2.pkce.PkceProperties;
-import de.adorsys.oauth2.pkce.basetypes.CodeChallenge;
-import de.adorsys.oauth2.pkce.basetypes.CodeVerifier;
-import de.adorsys.oauth2.pkce.basetypes.Nonce;
-import de.adorsys.oauth2.pkce.basetypes.State;
-import de.adorsys.oauth2.pkce.context.Oauth2PkceFactory;
+import de.adorsys.oauth2.pkce.model.CodeChallenge;
+import de.adorsys.oauth2.pkce.model.CodeVerifier;
+import de.adorsys.oauth2.pkce.model.Nonce;
+import de.adorsys.oauth2.pkce.model.State;
+import de.adorsys.oauth2.pkce.util.Oauth2PkceFactory;
 import de.adorsys.oauth2.pkce.util.TokenConstants;
 import org.springframework.web.util.UriComponentsBuilder;
 

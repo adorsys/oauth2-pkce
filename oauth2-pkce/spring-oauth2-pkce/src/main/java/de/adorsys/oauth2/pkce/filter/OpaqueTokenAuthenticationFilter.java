@@ -24,7 +24,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
-import de.adorsys.oauth2.pkce.service.UserInfo;
+import de.adorsys.oauth2.pkce.model.UserInfo;
 
 public class OpaqueTokenAuthenticationFilter implements Filter {
     private final Logger logger = LoggerFactory.getLogger(OpaqueTokenAuthenticationFilter.class);

@@ -1,6 +1,6 @@
 package de.adorsys.oauth2.pkce;
 
-import de.adorsys.oauth2.pkce.context.Oauth2PkceFactory;
+import de.adorsys.oauth2.pkce.util.Oauth2PkceFactory;
 import de.adorsys.oauth2.pkce.service.LoginRedirectService;
 import de.adorsys.oauth2.pkce.service.LogoutRedirectService;
 import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;

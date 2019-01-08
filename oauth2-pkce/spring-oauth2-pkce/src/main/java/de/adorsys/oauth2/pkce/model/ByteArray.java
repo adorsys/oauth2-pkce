@@ -1,4 +1,4 @@
-package de.adorsys.oauth2.pkce.basetypes;
+package de.adorsys.oauth2.pkce.model;
 
 import org.adorsys.cryptoutils.basetypes.BaseTypeByteArray;
 

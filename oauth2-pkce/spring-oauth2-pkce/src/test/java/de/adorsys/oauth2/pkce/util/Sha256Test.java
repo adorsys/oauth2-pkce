@@ -1,6 +1,6 @@
 package de.adorsys.oauth2.pkce.util;
 
-import de.adorsys.oauth2.pkce.basetypes.ByteArray;
+import de.adorsys.oauth2.pkce.model.ByteArray;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class Sha256Test {
     }
 
     @Test
-    public void should() throws Exception {
+    public void shouldHash() throws Exception {
         ByteArray expected = new ByteArray(new int[]{19, 211, 30, 150, 26, 26, 216, 236, 47, 22, 177, 12, 76, 152, 46,
                 8, 118, 168, 120, 173, 109, 241, 68, 86, 110, 225, 137, 74, 203,
                 112, 249, 195});
