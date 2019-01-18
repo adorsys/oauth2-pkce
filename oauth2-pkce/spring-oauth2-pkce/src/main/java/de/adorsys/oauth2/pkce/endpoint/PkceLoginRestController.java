@@ -31,22 +31,17 @@ public class PkceLoginRestController {
     private final CookieService cookieService;
     private final UserAgentStateService userAgentStateService;
 
-    // only for deprecated endpoints (will be removed in future releases)
-    private final PkceTokenRestController pkceTokenRestController;
-
     @Autowired
     public PkceLoginRestController(
             LoginRedirectService loginRedirectService,
             PkceProperties pkceProperties,
             CookieService cookieService,
-            UserAgentStateService userAgentStateService,
-            PkceTokenRestController pkceTokenRestController
+            UserAgentStateService userAgentStateService
     ) {
         this.loginRedirectService = loginRedirectService;
         this.pkceProperties = pkceProperties;
         this.cookieService = cookieService;
         this.userAgentStateService = userAgentStateService;
-        this.pkceTokenRestController = pkceTokenRestController;
     }
 
     // @formatter:off
@@ -188,33 +183,5 @@ public class PkceLoginRestController {
 
     private Cookie createCodeVerifierCookieForDeprecatedEndpoint(CodeVerifier codeVerifier) {
         return cookieService.creationCookieWithDefaultDuration(TokenConstants.CODE_VERIFIER_COOKIE_NAME, codeVerifier.getValue(), pkceProperties.getAuthEndpoint());
-    }
-
-    /**
-     * Deprecated: please use token endpoint instead
-     */
-    @Deprecated
-    @GetMapping(params = {TokenConstants.CODE_REQUEST_PARAMETER_NAME})
-    public void getTokenFromCode(
-            @RequestParam(TokenConstants.CODE_REQUEST_PARAMETER_NAME) String code,
-            @CookieValue(name = TokenConstants.CODE_VERIFIER_COOKIE_NAME) String codeVerifier,
-            @CookieValue(name = TokenConstants.USER_AGENT_STATE_COOKIE_NAME) String userAgentStateValue,
-            HttpServletResponse response
-    ) throws IOException {
-        pkceTokenRestController.getTokenFromCode(code, codeVerifier, userAgentStateValue, response);
-    }
-
-    /**
-     * Deprecated: please use token endpoint instead
-     */
-    @Deprecated
-    @GetMapping(params = {TokenConstants.CODE_REQUEST_PARAMETER_NAME, TokenConstants.REDIRECT_URI_PARAM_NAME})
-    public void getTokenFromCodeWithRedirect(
-            @RequestParam(TokenConstants.CODE_REQUEST_PARAMETER_NAME) String code,
-            @RequestParam(name = TokenConstants.REDIRECT_URI_PARAM_NAME) String redirectUri,
-            @CookieValue(name = TokenConstants.CODE_VERIFIER_COOKIE_NAME) String codeVerifier,
-            HttpServletResponse response
-    ) throws IOException {
-        pkceTokenRestController.getTokenFromCodeWithRedirect(code, redirectUri, codeVerifier, response);
     }
 }
