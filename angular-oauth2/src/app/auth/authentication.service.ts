@@ -3,7 +3,6 @@ import {Router} from "@angular/router";
 import {AppConfigService} from "../app.config.service";
 import {AuthenticatedUser} from "./authenticated-user";
 import {UserService} from "../user/user.service";
-import {TokenService} from "./token-service";
 
 @Injectable()
 export class AuthenticationService {
@@ -11,7 +10,6 @@ export class AuthenticationService {
 
   constructor(private appConfigService: AppConfigService,
               private userService: UserService,
-              private tokenService: TokenService,
               private router: Router) {
   }
 

@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   keycloak:
-    image: "jboss/keycloak:3.2.1.Final"
+    image: "jboss/keycloak:4.8.3.Final"
     environment:
       KEYCLOAK_PASSWORD: admin123
       KEYCLOAK_USER: admin
@@ -16,18 +16,25 @@ services:
     - "-b"
     - "0.0.0.0"
     - "--debug"
-  post_process:
-    image: adorsys/keycloak-config-cli:v0.2.2
+  keycloak_config:
+    image: adorsys/keycloak-config-cli:v0.4.2-1-4.8.3.Final
     depends_on:
     - keycloak
     networks:
     - my_network
     volumes:
-    - ./keycloak-config:/opt/keycloak-config-cli/configs
+    - ./keycloak-config:/tmp/keycloak-config-cli/configs
     environment:
-    - KEYCLOAK_URL=http://keycloak:8080/auth
+    - KEYCLOAK_URL=http://keycloak:8080
     - KEYCLOAK_ADMIN=admin
     - KEYCLOAK_ADMIN_PASSWORD=admin123
+    - KEYCLOAK_ENCRYPT_ADMIN_PASSWORD=false
+    - JWKS_CONNECT_TIMEOUT=2000
+    - JWKS_READ_TIMEOUT=1000
+    - JWKS_SIZE_LIMIT=1048576
+    - SPRING_PROFILES_INCLUDE=debug
+    entrypoint: ""
+    command: config-cli
   backend:
     build: ./oauth2-pkce/example-starter
     image: local/spring-oauth2:latest
