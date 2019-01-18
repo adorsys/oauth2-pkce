@@ -8,6 +8,8 @@ public interface TokenConstants {
 
     String REDIRECT_URI_PARAM_NAME = "redirect_uri";
 
+    String TARGET_PATH_PARAM_NAME = "target_path";
+
     String CODE_REQUEST_PARAMETER_NAME = "code";
 
     String CODE_VERIFIER_COOKIE_NAME = "code_verifier";

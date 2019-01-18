@@ -14,15 +14,19 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class SwaggerConfig {
     @Bean
     public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
+        Docket docket = new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(
                         Predicates.or(
-                            RequestHandlerSelectors.basePackage("de.adorsys.springoauth2"),
-                            RequestHandlerSelectors.basePackage("de.adorsys.oauth2.pkce.endpoint")
+                                RequestHandlerSelectors.basePackage("de.adorsys.springoauth2"),
+                                RequestHandlerSelectors.basePackage("de.adorsys.oauth2.pkce.endpoint")
                         )
                 )
                 .paths(PathSelectors.any())
                 .build();
+
+        docket.enableUrlTemplating(true);
+
+        return docket;
     }
 }

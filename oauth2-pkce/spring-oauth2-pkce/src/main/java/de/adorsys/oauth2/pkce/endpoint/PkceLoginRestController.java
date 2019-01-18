@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -62,7 +63,7 @@ public class PkceLoginRestController {
                 ), @ResponseHeader(
                     name = "Set-Cookie",
                     response = String.class,
-                    description = TokenConstants.USER_AGENT_STATE_COOKIE_NAME + "=<user-agent-state value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
+                    description = TokenConstants.CODE_VERIFIER_COOKIE_NAME + "=<code-verifier value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
                 )
             }
         )
@@ -91,6 +92,10 @@ public class PkceLoginRestController {
                     name = "Set-Cookie",
                     response = String.class,
                     description = TokenConstants.USER_AGENT_STATE_COOKIE_NAME + "=<user-agent-state value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
+                ), @ResponseHeader(
+                    name = "Set-Cookie",
+                    response = String.class,
+                    description = TokenConstants.CODE_VERIFIER_COOKIE_NAME + "=<code-verifier value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
                 )
             }
         )
@@ -106,6 +111,51 @@ public class PkceLoginRestController {
         String redirectUri = builder.replacePath(pkceProperties.getTokenEndpoint()).build().toUriString();
 
         redirectToLogin(referer, redirectUri, response);
+    }
+
+    // @formatter:off
+    @ApiOperation(value = "Login with provided target-path", code = 302)
+    @ApiResponses(value = {
+        @ApiResponse(
+            code = HttpServletResponse.SC_FOUND,
+            message = "Redirect to IDP login page",
+            responseHeaders = {
+                @ResponseHeader(
+                    name = "location",
+                    response = String.class,
+                    description = "Url to login page"
+                ), @ResponseHeader(
+                    name = "Set-Cookie",
+                    response = String.class,
+                    description = TokenConstants.USER_AGENT_STATE_COOKIE_NAME + "=<user-agent-state value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
+                ), @ResponseHeader(
+                    name = "Set-Cookie",
+                    response = String.class,
+                    description = TokenConstants.CODE_VERIFIER_COOKIE_NAME + "=<code-verifier value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
+                )
+            }
+        )
+    })
+    // @formatter:on
+    @GetMapping(params = TokenConstants.TARGET_PATH_PARAM_NAME)
+    public void redirectToLoginPageWithTarget(
+            HttpServletRequest request,
+            @RequestParam(TokenConstants.TARGET_PATH_PARAM_NAME) String targetPath,
+            @RequestHeader(TokenConstants.REFERER_HEADER_KEYWORD) String referer,
+            HttpServletResponse response
+    ) throws IOException {
+        ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(request);
+        String redirectUri = builder.replacePath(pkceProperties.getTokenEndpoint()).build().toUriString();
+        String refererUri = buildRefererUri(targetPath, referer);
+
+        redirectToLogin(refererUri, redirectUri, response);
+    }
+
+    private String buildRefererUri(String targetPath, String referer) {
+        return UriComponentsBuilder.fromUriString(referer)
+                .replacePath(targetPath)
+                .build()
+                .toString();
     }
 
     private void redirectToLogin(String originLocation, String redirectUri, HttpServletResponse response) throws IOException {

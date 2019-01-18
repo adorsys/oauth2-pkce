@@ -55,6 +55,10 @@ export class LoginComponent implements OnInit {
     return `${this.appConfigService.getBackendUrl()}${this.appConfigService.getLoginEndpoint()}?redirect_uri=${this.appConfigService.getRedirectUri()}`;
   }
 
+  public get loginUrlWithTarget() {
+    return `${this.appConfigService.getBackendUrl()}${this.appConfigService.getLoginEndpoint()}?target_path=/login`;
+  }
+
   public get logoutUrl() {
     return `${this.appConfigService.getBackendUrl()}${this.appConfigService.getLogoutEndpoint()}`;
   }
