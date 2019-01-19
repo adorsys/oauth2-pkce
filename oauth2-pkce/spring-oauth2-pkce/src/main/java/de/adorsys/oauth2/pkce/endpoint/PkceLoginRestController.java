@@ -171,9 +171,6 @@ public class PkceLoginRestController {
         Cookie codeVerifier = createCodeVerifierCookie(redirect.getCodeVerifier());
         response.addCookie(codeVerifier);
 
-        codeVerifier = createCodeVerifierCookieForDeprecatedEndpoint(redirect.getCodeVerifier());
-        response.addCookie(codeVerifier);
-
         response.sendRedirect(redirect.getRedirectUrl());
     }
 

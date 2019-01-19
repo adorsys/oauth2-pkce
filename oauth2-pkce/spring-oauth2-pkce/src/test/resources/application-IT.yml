@@ -1,0 +1,24 @@
+pkce:
+  scope: openid
+  code-challenge-method: S256
+  response-type: code
+  secure-cookie: false
+  auth-endpoint: /oauth2/login
+  token-endpoint: /oauth2/token
+  logout-endpoint: /oauth2/logout
+
+  client-id: moped-client
+  client-secret: 939d28bd-8d06-4cd3-8324-10b4c7b12852
+  access-token-uri: http://localhost:8080/auth/realms/moped/protocol/openid-connect/token
+  user-authorization-uri: http://localhost:8080/auth/realms/moped/protocol/openid-connect/auth
+  user-info-uri: https://localhost:8080/auth/realms/moped/protocol/openid-connect/userinfo
+  logout-uri: http://localhost:8080/auth/realms/moped/protocol/openid-connect/logout
+  redirect-uri: http://localhost/token
+  user-agent-auto-protected-pages: /swagger-ui.html,/user,/me
+  response-type: code
+
+sts:
+  authservers:
+  - name: local keycloak
+    iss-url: http://localhost:8080/auth/realms/moped
+    jwks-url: http://localhost:8080/auth/realms/moped/protocol/openid-connect/certs
