@@ -96,6 +96,13 @@
 				<artifactId>springfox-swagger2</artifactId>
 				<version>2.9.2</version>
 			</dependency>
+
+			<dependency>
+				<groupId>eu.codearte.catch-exception</groupId>
+				<artifactId>catch-exception</artifactId>
+				<version>1.4.4</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

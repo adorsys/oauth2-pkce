@@ -4,6 +4,7 @@ import de.adorsys.oauth2.pkce.PkceProperties;
 import de.adorsys.oauth2.pkce.model.CodeVerifier;
 import de.adorsys.oauth2.pkce.service.CookieService;
 import de.adorsys.oauth2.pkce.service.LoginRedirectService;
+import de.adorsys.oauth2.pkce.service.RefererService;
 import de.adorsys.oauth2.pkce.service.UserAgentStateService;
 import de.adorsys.oauth2.pkce.util.TokenConstants;
 import io.swagger.annotations.*;
@@ -12,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -30,18 +30,21 @@ public class PkceLoginRestController {
     private final PkceProperties pkceProperties;
     private final CookieService cookieService;
     private final UserAgentStateService userAgentStateService;
+    private final RefererService refererService;
 
     @Autowired
     public PkceLoginRestController(
             LoginRedirectService loginRedirectService,
             PkceProperties pkceProperties,
             CookieService cookieService,
-            UserAgentStateService userAgentStateService
+            UserAgentStateService userAgentStateService,
+            RefererService refererService
     ) {
         this.loginRedirectService = loginRedirectService;
         this.pkceProperties = pkceProperties;
         this.cookieService = cookieService;
         this.userAgentStateService = userAgentStateService;
+        this.refererService = refererService;
     }
 
     // @formatter:off
@@ -141,16 +144,9 @@ public class PkceLoginRestController {
     ) throws IOException {
         ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(request);
         String redirectUri = builder.replacePath(pkceProperties.getTokenEndpoint()).build().toUriString();
-        String refererUri = buildRefererUri(targetPath, referer);
+        String refererUri = refererService.buildRedirectUri(referer, targetPath);
 
         redirectToLogin(refererUri, redirectUri, response);
-    }
-
-    private String buildRefererUri(String targetPath, String referer) {
-        return UriComponentsBuilder.fromUriString(referer)
-                .replacePath(targetPath)
-                .build()
-                .toString();
     }
 
     private void redirectToLogin(String originLocation, String redirectUri, HttpServletResponse response) throws IOException {
@@ -176,9 +172,5 @@ public class PkceLoginRestController {
 
     private Cookie createCodeVerifierCookie(CodeVerifier codeVerifier) {
         return cookieService.creationCookieWithDefaultDuration(TokenConstants.CODE_VERIFIER_COOKIE_NAME, codeVerifier.getValue(), pkceProperties.getTokenEndpoint());
-    }
-
-    private Cookie createCodeVerifierCookieForDeprecatedEndpoint(CodeVerifier codeVerifier) {
-        return cookieService.creationCookieWithDefaultDuration(TokenConstants.CODE_VERIFIER_COOKIE_NAME, codeVerifier.getValue(), pkceProperties.getAuthEndpoint());
     }
 }
