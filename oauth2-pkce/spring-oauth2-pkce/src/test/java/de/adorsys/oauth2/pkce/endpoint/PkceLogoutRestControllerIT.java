@@ -183,4 +183,41 @@ public class PkceLogoutRestControllerIT {
         assertThat(refreshTokenCookie.getPath(), is(equalTo("/")));
         assertThat(refreshTokenCookie.getMaxAge(), is(equalTo(0L)));
     }
+
+    @Test
+    public void shouldRespondWith302WhenRequestLogoutWithRedirectUriAndReferer() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "access_token=" + ACCESS_TOKEN);
+        headers.add("Cookie", "refresh_token=" + "my_custom_refresh_token");
+        headers.add("Referer", REFERER);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+
+        ResponseEntity<String> response = restTemplate.exchange("/oauth2/logout?redirect_uri=" + REDIRECT_URI, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
+        HttpHeaders responseHeaders = response.getHeaders();
+        URI redirectLocation = responseHeaders.getLocation();
+
+        assertThat(redirectLocation.toString(), is(equalTo(LOGOUT_URL + "?redirect_uri=" + REDIRECT_URI)));
+
+        MultiValueMap<String, HttpCookie> responseCookies = UriCookieUtils.parseCookiesAsMap(responseHeaders);
+        assertThat(responseCookies.size(), is(equalTo(2)));
+
+        List<HttpCookie> accessTokenCookies = responseCookies.get("access_token");
+        assertThat(accessTokenCookies, hasSize(1));
+
+        HttpCookie accessTokenCookie = accessTokenCookies.get(0);
+        assertThat(accessTokenCookie.getValue(), is(equalTo("")));
+        assertThat(accessTokenCookie.getPath(), is(equalTo("/")));
+        assertThat(accessTokenCookie.getMaxAge(), is(equalTo(0L)));
+
+        List<HttpCookie> refreshTokenCookies = responseCookies.get("refresh_token");
+        assertThat(refreshTokenCookies, hasSize(1));
+
+        HttpCookie refreshTokenCookie = refreshTokenCookies.get(0);
+        assertThat(refreshTokenCookie.getValue(), is(equalTo("")));
+        assertThat(refreshTokenCookie.getPath(), is(equalTo("/")));
+        assertThat(refreshTokenCookie.getMaxAge(), is(equalTo(0L)));
+    }
 }
