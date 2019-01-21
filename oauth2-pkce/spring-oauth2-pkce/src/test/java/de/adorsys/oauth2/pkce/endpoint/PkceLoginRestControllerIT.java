@@ -47,7 +47,7 @@ import static org.mockito.BDDMockito.given;
 )
 @ActiveProfiles("IT")
 @DirtiesContext
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TestPkceConfiguration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PkceLoginRestControllerIT {
 
     private static final String NONCE = "my_custom_nonce";
