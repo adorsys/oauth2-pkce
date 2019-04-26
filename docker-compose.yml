@@ -51,6 +51,7 @@ services:
       - NG_BACKEND_URL=http://localhost:8888
       - NG_LOGIN_ENDPOINT=/oauth2/login
       - NG_LOGOUT_ENDPOINT=/oauth2/logout
+      - NG_TOKEN_ENDPOINT=/oauth2/token
       - NG_REDIRECT_URI=http://localhost/#/token
     depends_on:
     - backend

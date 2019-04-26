@@ -37,27 +37,6 @@ public class UserAgentStateService {
         this.pkceProperties = pkceProperties;
     }
 
-    public Optional<UserAgentState> readUserAgentStateCookie(HttpServletRequest request) {
-        Cookie cookie = WebUtils.getCookie(request, TokenConstants.USER_AGENT_STATE_COOKIE_NAME);
-
-        if (cookie == null || StringUtils.isBlank(cookie.getValue()))
-            return Optional.empty();
-
-        return tryToReadUserAgentState(cookie.getValue());
-    }
-
-    public Optional<UserAgentState> tryToReadUserAgentState(String value) {
-        byte[] decoded = Base64.getDecoder().decode(value);
-
-        try {
-            UserAgentState userAgentState = objectMapper.readValue(decoded, UserAgentState.class);
-            return Optional.of(userAgentState);
-        } catch (IOException e) {
-            if(logger.isDebugEnabled()) logger.debug(e.getMessage());
-            return Optional.empty();
-        }
-    }
-
     public UserAgentState readUserAgentState(String value) {
         byte[] decoded = Base64.getDecoder().decode(value);
 

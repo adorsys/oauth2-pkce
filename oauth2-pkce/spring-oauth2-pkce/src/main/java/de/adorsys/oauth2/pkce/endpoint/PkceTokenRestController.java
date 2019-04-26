@@ -139,9 +139,7 @@ public class PkceTokenRestController {
 
         response.addCookie(createTokenCookie(TokenConstants.ACCESS_TOKEN_COOKIE_NAME, bearerToken.getAccess_token(), bearerToken.getExpires_in()));
         response.addCookie(createTokenCookie(TokenConstants.REFRESH_TOKEN_COOKIE_NAME, bearerToken.getRefresh_token(), bearerToken.anyRefreshTokenExpireIn()));
-
         response.addCookie(deleteCodeVerifierCookie());
-        response.addCookie(deleteCodeVerifierCookieForDeprecatedEndpoint());
 
         response.sendRedirect(originUri);
     }
@@ -154,9 +152,5 @@ public class PkceTokenRestController {
 
     private Cookie deleteCodeVerifierCookie() {
         return cookieService.deletionCookie(TokenConstants.CODE_VERIFIER_COOKIE_NAME, pkceProperties.getTokenEndpoint());
-    }
-
-    private Cookie deleteCodeVerifierCookieForDeprecatedEndpoint() {
-        return cookieService.deletionCookie(TokenConstants.CODE_VERIFIER_COOKIE_NAME, pkceProperties.getAuthEndpoint());
     }
 }
