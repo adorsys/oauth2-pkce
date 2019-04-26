@@ -1,5 +1,6 @@
 package de.adorsys.oauth2.pkce.endpoint;
 
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import de.adorsys.oauth2.pkce.config.TestPkceConfiguration;
 import de.adorsys.oauth2.pkce.service.PkceTokenRequestService;
 import de.adorsys.oauth2.pkce.service.UserAgentStateService;
@@ -42,8 +43,8 @@ import static org.mockito.Mockito.when;
 @DirtiesContext
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PkceTokenRestControllerIT {
-    // base64-encoded {"redirectUri":"http://my-custom-redirect-uri","userAgentPage":"http://my-custom-user-agent-page"}
-    private static final String AGENT_STATE = "eyJyZWRpcmVjdFVyaSI6Imh0dHA6Ly9teS1jdXN0b20tcmVkaXJlY3QtdXJpIiwidXNlckFnZW50UGFnZSI6Imh0dHA6Ly9teS1jdXN0b20tdXNlci1hZ2VudC1wYWdlIn0=";
+    private static final String AGENT_STATE_VALUE = "{\"redirectUri\":\"http://my-custom-redirect-uri\",\"userAgentPage\":\"http://my-custom-user-agent-page\"}";
+    private static final String AGENT_STATE_BASE64 = Base64.encode(AGENT_STATE_VALUE.getBytes());
     private static final String CODE = "my_custom_code";
     private static final String CODE_VERIFIER = "my_custom_code_verifier";
     private static final String ACCESS_TOKEN = "my_custom_access_token";
@@ -80,7 +81,7 @@ public class PkceTokenRestControllerIT {
     public void shouldRespondWith302WhenRequestTokenWithCode() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
-        headers.add("Cookie", "user_agent_state=" + AGENT_STATE);
+        headers.add("Cookie", "user_agent_state=" + AGENT_STATE_BASE64);
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 
         ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?code=" + CODE, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
@@ -201,7 +202,7 @@ public class PkceTokenRestControllerIT {
     public void shouldRespondWith302WhenRequestTokenWithRedirectAndCodeVerifierAndUserAgentStateButWithoutCode() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
-        headers.add("Cookie", "user_agent_state=" + AGENT_STATE);
+        headers.add("Cookie", "user_agent_state=" + AGENT_STATE_BASE64);
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 
         ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?redirect_uri=" + REDIRECT_URI, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
