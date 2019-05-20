@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Optional;
 
 @Api(value = "OAUTH2 PKCE Token")
 @RestController("OAUTH2 PKCE Token Controller")
@@ -84,7 +83,7 @@ public class PkceTokenRestController {
             @RequestParam(TokenConstants.CODE_REQUEST_PARAMETER_NAME) String code,
             @CookieValue(name = TokenConstants.CODE_VERIFIER_COOKIE_NAME) String codeVerifier,
             @CookieValue(name = TokenConstants.USER_AGENT_STATE_COOKIE_NAME) String userAgentStateValue,
-            @CookieValue(name = TokenConstants.NONCE_COOKIE_NAME, required = false) String nonceValue,
+            @CookieValue(name = TokenConstants.NONCE_COOKIE_NAME) String nonceValue,
             HttpServletResponse response
     ) throws IOException {
         UserAgentStateService.UserAgentState userAgentState = userAgentStateService.readUserAgentState(userAgentStateValue);
@@ -134,7 +133,7 @@ public class PkceTokenRestController {
             @RequestParam(TokenConstants.CODE_REQUEST_PARAMETER_NAME) String code,
             @RequestParam(name = TokenConstants.REDIRECT_URI_PARAM_NAME) String redirectUri,
             @CookieValue(name = TokenConstants.CODE_VERIFIER_COOKIE_NAME) String codeVerifier,
-            @CookieValue(name = TokenConstants.NONCE_COOKIE_NAME, required = false) String nonceValue,
+            @CookieValue(name = TokenConstants.NONCE_COOKIE_NAME) String nonceValue,
             HttpServletResponse response
     ) throws IOException {
         getTokenForCode(code, redirectUri, redirectUri, codeVerifier, response, nonceValue);
@@ -159,12 +158,8 @@ public class PkceTokenRestController {
                 redirectUri
         );
 
-        Boolean isNonceValid = Optional.ofNullable(nonceValue)
-                .map(Nonce::new)
-                .map(n -> nonceValidation.hasNonce(bearerToken.getAccess_token(), n))
-                .orElse(true);
-
-        if (!isNonceValid) {
+        Nonce expectedNonce = new Nonce(nonceValue);
+        if (!nonceValidation.hasNonce(bearerToken.getAccess_token(), expectedNonce)) {
             throw new BadNonceException("Nonce '" + nonceValue + "' is not valid");
         }
 

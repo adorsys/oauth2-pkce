@@ -79,7 +79,7 @@ public class PkceTokenRestControllerIT {
     }
 
     @Test
-    public void shouldRespondWith302WhenRequestTokenWithCode() {
+    public void shouldRespondWith400WhenRequestTokenWithCodeButWithoutNonce() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
         headers.add("Cookie", "user_agent_state=" + AGENT_STATE_BASE64);
@@ -87,54 +87,7 @@ public class PkceTokenRestControllerIT {
 
         ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?code=" + CODE, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
 
-        assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
-
-        HttpHeaders responseHeaders = response.getHeaders();
-        URI redirectLocation = responseHeaders.getLocation();
-        assertThat(redirectLocation.toString(), is(equalTo("http://my-custom-user-agent-page")));
-
-        MultiValueMap<String, HttpCookie> responseCookies = UriCookieUtils.parseCookiesAsMap(responseHeaders);
-        assertThat(responseCookies.size(), is(equalTo(5)));
-
-        List<HttpCookie> accessTokenCookies = responseCookies.get("access_token");
-        assertThat(accessTokenCookies, hasSize(1));
-
-        HttpCookie accessTokenCookie = accessTokenCookies.get(0);
-        assertThat(accessTokenCookie.getValue(), is(equalTo(ACCESS_TOKEN_WITH_NONCE)));
-        assertThat(accessTokenCookie.getPath(), is(equalTo("/")));
-        assertThat(accessTokenCookie.getMaxAge(), is(equalTo(ACCESS_TOKEN_EXPIRE_IN)));
-
-        List<HttpCookie> refreshTokenCookies = responseCookies.get("refresh_token");
-        assertThat(refreshTokenCookies, hasSize(1));
-
-        HttpCookie refreshTokenCookie = refreshTokenCookies.get(0);
-        assertThat(refreshTokenCookie.getValue(), is(equalTo(REFRESH_TOKEN)));
-        assertThat(refreshTokenCookie.getPath(), is(equalTo("/")));
-        assertThat(refreshTokenCookie.getMaxAge(), is(equalTo(REFRESH_TOKEN_EXPIRE_IN)));
-
-        List<HttpCookie> codeVerifierCookies = responseCookies.get("code_verifier");
-        assertThat(codeVerifierCookies, hasSize(1));
-
-        HttpCookie codeVerifierCookie = codeVerifierCookies.get(0);
-        assertThat(codeVerifierCookie.getValue(), is(equalTo("")));
-        assertThat(codeVerifierCookie.getPath(), is(equalTo("/oauth2/token")));
-        assertThat(codeVerifierCookie.getMaxAge(), is(equalTo(0L)));
-
-        List<HttpCookie> userAgentStateCookies = responseCookies.get("user_agent_state");
-        assertThat(userAgentStateCookies, hasSize(1));
-
-        HttpCookie userAgentStateCookie = userAgentStateCookies.get(0);
-        assertThat(userAgentStateCookie.getValue(), is(equalTo("")));
-        assertThat(userAgentStateCookie.getPath(), is(equalTo("/oauth2/token")));
-        assertThat(userAgentStateCookie.getMaxAge(), is(equalTo(0L)));
-
-        List<HttpCookie> nonceCookies = responseCookies.get("nonce");
-        assertThat(nonceCookies, hasSize(1));
-
-        HttpCookie nonceCookie = nonceCookies.get(0);
-        assertThat(nonceCookie.getValue(), is(equalTo("")));
-        assertThat(nonceCookie.getPath(), is(equalTo("/oauth2/token")));
-        assertThat(nonceCookie.getMaxAge(), is(equalTo(0L)));
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 
     @Test
@@ -198,7 +151,7 @@ public class PkceTokenRestControllerIT {
     }
 
     @Test
-    public void shouldRespondWith400WhenRequestTokenWithCodeAndNonceButAccessTokenContainsOtherNonce() {
+    public void shouldRespondWith400WhenRequestTokenWithCodeButWithWrongNonce() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
         headers.add("Cookie", "user_agent_state=" + AGENT_STATE_BASE64);
@@ -211,9 +164,22 @@ public class PkceTokenRestControllerIT {
     }
 
     @Test
-    public void shouldRespondWith302WhenRequestTokenWithCodeAndRedirectUri() {
+    public void shouldRespondWith400WhenRequestTokenWithCodeAndRedirectUriButWithoutNonce() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+
+        ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?code=" + CODE + "&redirect_uri=" + REDIRECT_URI, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void shouldRespondWith302WhenRequestTokenWithCodeAndRedirectUriAndNonce() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
+        headers.add("Cookie", "nonce=" + NONCE);
+
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 
         ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?code=" + CODE + "&redirect_uri=" + REDIRECT_URI, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
@@ -266,6 +232,19 @@ public class PkceTokenRestControllerIT {
         assertThat(nonceCookie.getValue(), is(equalTo("")));
         assertThat(nonceCookie.getPath(), is(equalTo("/oauth2/token")));
         assertThat(nonceCookie.getMaxAge(), is(equalTo(0L)));
+    }
+
+    @Test
+    public void shouldRespondWith302WhenRequestTokenWithCodeAndRedirectUriButWithWrongNonce() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
+        headers.add("Cookie", "nonce=" + "other_nonce_than_in_token");
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+
+        ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?code=" + CODE + "&redirect_uri=" + REDIRECT_URI, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 
     @Test
