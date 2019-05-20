@@ -2,6 +2,7 @@ package de.adorsys.oauth2.pkce.endpoint;
 
 import de.adorsys.oauth2.pkce.PkceProperties;
 import de.adorsys.oauth2.pkce.model.CodeVerifier;
+import de.adorsys.oauth2.pkce.model.Nonce;
 import de.adorsys.oauth2.pkce.service.CookieService;
 import de.adorsys.oauth2.pkce.service.LoginRedirectService;
 import de.adorsys.oauth2.pkce.service.RefererService;
@@ -62,6 +63,12 @@ public class PkceLoginRestController {
                     name = "Set-Cookie",
                     response = String.class,
                     description = TokenConstants.CODE_VERIFIER_COOKIE_NAME + "=<code-verifier value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
+                ), @ResponseHeader(
+                    // why i am using \0's?
+                    // look here: https://github.com/OAI/OpenAPI-Specification/issues/1237#issuecomment-423955715
+                    name = "\0Set-Cookie",
+                    response = String.class,
+                    description = TokenConstants.NONCE_COOKIE_NAME + "=<nonce value>; Path=/; Secure; HttpOnly; Max-Age=<nonce's max-age value>"
                 )
             }
         )
@@ -91,9 +98,13 @@ public class PkceLoginRestController {
                     response = String.class,
                     description = TokenConstants.USER_AGENT_STATE_COOKIE_NAME + "=<user-agent-state value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
                 ), @ResponseHeader(
-                    name = "Set-Cookie",
+                    name = "\0Set-Cookie",
                     response = String.class,
                     description = TokenConstants.CODE_VERIFIER_COOKIE_NAME + "=<code-verifier value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
+                ), @ResponseHeader(
+                    name = "\0\0Set-Cookie",
+                    response = String.class,
+                    description = TokenConstants.NONCE_COOKIE_NAME + "=<nonce value>; Path=/; Secure; HttpOnly; Max-Age=<nonce's max-age value>"
                 )
             }
         )
@@ -127,9 +138,13 @@ public class PkceLoginRestController {
                     response = String.class,
                     description = TokenConstants.USER_AGENT_STATE_COOKIE_NAME + "=<user-agent-state value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
                 ), @ResponseHeader(
-                    name = "Set-Cookie",
+                    name = "\0Set-Cookie",
                     response = String.class,
                     description = TokenConstants.CODE_VERIFIER_COOKIE_NAME + "=<code-verifier value>; Path=/; Secure; HttpOnly; Max-Age=<token's max-age value>"
+                ), @ResponseHeader(
+                    name = "\0\0Set-Cookie",
+                    response = String.class,
+                    description = TokenConstants.NONCE_COOKIE_NAME + "=<nonce value>; Path=/; Secure; HttpOnly; Max-Age=<nonce's max-age value>"
                 )
             }
         )
@@ -158,6 +173,9 @@ public class PkceLoginRestController {
         Cookie userAgentStateCookie = userAgentStateService.createRedirectCookie(originLocation, redirectUri);
         response.addCookie(userAgentStateCookie);
 
+        Cookie nonceCookie = createNonceCookie(redirect.getGeneratedNonce());
+        response.addCookie(nonceCookie);
+
         response.sendRedirect(redirect.getRedirectUrl());
     }
 
@@ -167,10 +185,17 @@ public class PkceLoginRestController {
         Cookie codeVerifier = createCodeVerifierCookie(redirect.getCodeVerifier());
         response.addCookie(codeVerifier);
 
+        Cookie nonce = createNonceCookie(redirect.getGeneratedNonce());
+        response.addCookie(nonce);
+
         response.sendRedirect(redirect.getRedirectUrl());
     }
 
     private Cookie createCodeVerifierCookie(CodeVerifier codeVerifier) {
         return cookieService.creationCookieWithDefaultDuration(TokenConstants.CODE_VERIFIER_COOKIE_NAME, codeVerifier.getValue(), pkceProperties.getTokenEndpoint());
+    }
+
+    private Cookie createNonceCookie(Nonce nonce) {
+        return cookieService.creationCookieWithDefaultDuration(TokenConstants.NONCE_COOKIE_NAME, nonce.getValue(), pkceProperties.getTokenEndpoint());
     }
 }

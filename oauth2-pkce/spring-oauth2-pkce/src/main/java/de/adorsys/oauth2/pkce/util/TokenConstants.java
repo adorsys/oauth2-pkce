@@ -21,4 +21,6 @@ public interface TokenConstants {
     String USER_AGENT_STATE_COOKIE_NAME = "user_agent_state";
 
     String REFERER_HEADER_KEYWORD = "Referer";
+
+    String NONCE_COOKIE_NAME = "nonce";
 }

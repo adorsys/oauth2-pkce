@@ -21,12 +21,16 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>de.adorsys.cryptoutils</groupId>
-			<artifactId>basetypes</artifactId>
+			<groupId>de.adorsys.sts</groupId>
+			<artifactId>sts-crypto-utils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
 		</dependency>
 		<dependency>
 		    <groupId>org.apache.commons</groupId>
-		  <artifactId>commons-lang3</artifactId>		
+		  <artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.springfox</groupId>

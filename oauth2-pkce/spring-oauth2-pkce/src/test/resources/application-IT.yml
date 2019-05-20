@@ -1,7 +1,6 @@
 pkce:
   scope: openid
   code-challenge-method: S256
-  response-type: code
   secure-cookie: false
   auth-endpoint: /oauth2/login
   token-endpoint: /oauth2/token
