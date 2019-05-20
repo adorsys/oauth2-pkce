@@ -35,13 +35,13 @@ public class PkceTokenRequestService {
     }
 
     public TokenResponse requestToken(String code, String codeVerifier, String redirectUri) {
-        if(logger.isTraceEnabled()) logger.trace("Request token start...");
+        if (logger.isTraceEnabled()) logger.trace("Request token start...");
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Basic " + buildAuthorizationHeader());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> body= new LinkedMultiValueMap<>();
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add(TokenConstants.REDIRECT_URI_PARAM_NAME, redirectUri);
         body.add("code", code);
@@ -56,13 +56,14 @@ public class PkceTokenRequestService {
                 TokenResponse.class
         );
 
-        if(logger.isTraceEnabled()) logger.trace("Request token finished.");
+
+        if (logger.isTraceEnabled()) logger.trace("Request token finished.");
 
         return exchange.getBody();
     }
-    
+
     public TokenResponse refreshAccessToken(String refreshToken) {
-        if(logger.isTraceEnabled()) logger.trace("Refresh access-token for refresh-token start...");
+        if (logger.isTraceEnabled()) logger.trace("Refresh access-token for refresh-token start...");
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, "Basic " + buildAuthorizationHeader());
@@ -83,22 +84,22 @@ public class PkceTokenRequestService {
                     TokenResponse.class
             );
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             UUID uuid = UUID.randomUUID();
             String message = ExceptionFormatter.format(uuid.toString(), e);
 
-            if(logger.isDebugEnabled()) logger.debug("Cannot refresh access-token. message: {}", message, e);
+            if (logger.isDebugEnabled()) logger.debug("Cannot refresh access-token. message: {}", message, e);
 
             throw new UnauthorizedException(message, e);
         }
 
-        if(logger.isTraceEnabled()) logger.trace("Refresh access-token for refresh-token finished.");
+        if (logger.isTraceEnabled()) logger.trace("Refresh access-token for refresh-token finished.");
 
         return exchange.getBody();
     }
-    
+
     public UserInfo userInfo(String accessToken) {
-        if(logger.isTraceEnabled()) logger.trace("Get user info for access-token start...");
+        if (logger.isTraceEnabled()) logger.trace("Get user info for access-token start...");
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(TokenConstants.AUTHORIZATION_HEADER_NAME, TokenConstants.AUTHORIZATION_HEADER_TOKEN_PREFIX + accessToken);
@@ -112,16 +113,16 @@ public class PkceTokenRequestService {
                     HttpMethod.GET, request,
                     UserInfo.class
             );
-        } catch(Exception e) {
+        } catch (Exception e) {
             UUID uuid = UUID.randomUUID();
             String message = ExceptionFormatter.format(uuid.toString(), e);
 
-            if(logger.isDebugEnabled()) logger.debug("Cannot get user-info. message: {}", message, e);
+            if (logger.isDebugEnabled()) logger.debug("Cannot get user-info. message: {}", message, e);
 
             throw new UnauthorizedException(message, e);
         }
 
-        if(logger.isTraceEnabled()) logger.trace("Get user info for access-token finished.");
+        if (logger.isTraceEnabled()) logger.trace("Get user info for access-token finished.");
 
         return exchange.getBody();
     }
@@ -153,8 +154,8 @@ public class PkceTokenRequestService {
         }
 
         public Long getRefresh_expires_in() {
-			return refresh_expires_in;
-		}
+            return refresh_expires_in;
+        }
 
         public String getId_token() {
             return id_token;
@@ -173,26 +174,26 @@ public class PkceTokenRequestService {
         }
 
         public boolean isExpired() {
-        	return isExpiredInternal(expires_in);
+            return isExpiredInternal(expires_in);
         }
-        
+
         public boolean isRefreshTokenExpired() {
-        	return isExpiredInternal(refresh_expires_in) && isExpiredInternal(refresh_token_expires_in);
+            return isExpiredInternal(refresh_expires_in) && isExpiredInternal(refresh_token_expires_in);
         }
-        
+
         public Long anyRefreshTokenExpireIn() {
-        	if(refresh_expires_in != null) return refresh_expires_in;
-        	return refresh_token_expires_in;
+            if (refresh_expires_in != null) return refresh_expires_in;
+            return refresh_token_expires_in;
         }
-        
+
         private static boolean isExpiredInternal(Long expireIn) {
-        	if(expireIn == null) return true;
+            if (expireIn == null) return true;
             Date expiration = Date.from(Instant.ofEpochMilli(expireIn));
             return expiration.before(new Date());
         }
-        
 
-		@Override
+
+        @Override
         public String toString() {
             return "TokenResponse{" +
                     "refresh_token='" + refresh_token + '\'' +
