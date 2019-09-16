@@ -27,11 +27,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>de.adorsys.cryptoutils</groupId>
-			<artifactId>basetypes</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>de.adorsys.oauth2-pkce</groupId>
 			<artifactId>spring-oauth2-pkce</artifactId>
 		</dependency>

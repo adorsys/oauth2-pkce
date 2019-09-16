@@ -1,7 +1,6 @@
 package de.adorsys.oauth2.pkce.model;
 
-import org.adorsys.cryptoutils.basetypes.BaseTypeByteArray;
-
+import de.adorsys.sts.common.model.BaseTypeByteArray;
 
 public class ByteArray extends BaseTypeByteArray {
     public ByteArray(byte[] value) {

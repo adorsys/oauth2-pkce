@@ -98,10 +98,13 @@ public class PkceLoginRestControllerIT {
         assertThat(redirectLocation.getHost(), is(equalTo("localhost")));
         assertThat(redirectLocation.getPath(), is(equalTo("/auth/realms/moped/protocol/openid-connect/auth")));
 
-        List<HttpCookie> responseCookies = UriCookieUtils.parseCookiesToList(responseHeaders);
-        assertThat(responseCookies.size(), is(equalTo(1)));
+        MultiValueMap<String, HttpCookie> responseCookies = UriCookieUtils.parseCookiesAsMap(responseHeaders);
+        assertThat(responseCookies.size(), is(equalTo(2)));
 
-        HttpCookie codeVerifierCookie = responseCookies.get(0);
+        List<HttpCookie> codeVerifierCookies = responseCookies.get(TokenConstants.CODE_VERIFIER_COOKIE_NAME);
+        assertThat(codeVerifierCookies, hasSize(1));
+
+        HttpCookie codeVerifierCookie = codeVerifierCookies.get(0);
         assertThat(codeVerifierCookie.getName(), is(equalTo(TokenConstants.CODE_VERIFIER_COOKIE_NAME)));
         assertThat(codeVerifierCookie.getPath(), is(equalTo("/oauth2/token")));
         assertThat(codeVerifierCookie.getMaxAge(), is(equalTo(3600L)));
@@ -118,6 +121,15 @@ public class PkceLoginRestControllerIT {
         assertThat(queryParams.get("code_challenge"), is(equalTo(CODE_CHALLENGE)));
         assertThat(queryParams.get("nonce"), is(equalTo(NONCE)));
         assertThat(queryParams.get("state"), is(equalTo(STATE)));
+
+        List<HttpCookie> nonceCookies = responseCookies.get(TokenConstants.NONCE_COOKIE_NAME);
+        assertThat(nonceCookies, hasSize(1));
+
+        HttpCookie nonceCookie = nonceCookies.get(0);
+        assertThat(nonceCookie.getName(), is(equalTo(TokenConstants.NONCE_COOKIE_NAME)));
+        assertThat(nonceCookie.getPath(), is(equalTo("/oauth2/token")));
+        assertThat(nonceCookie.getMaxAge(), is(equalTo(3600L)));
+        assertThat(nonceCookie.getValue(), is(equalTo(NONCE)));
     }
 
     @Test
@@ -138,7 +150,7 @@ public class PkceLoginRestControllerIT {
         assertThat(redirectLocation.getPath(), is(equalTo("/auth/realms/moped/protocol/openid-connect/auth")));
 
         MultiValueMap<String, HttpCookie> responseCookies = UriCookieUtils.parseCookiesAsMap(responseHeaders);
-        assertThat(responseCookies.size(), is(equalTo(2)));
+        assertThat(responseCookies.size(), is(equalTo(3)));
 
         List<HttpCookie> codeVerifierCookies = responseCookies.get(TokenConstants.CODE_VERIFIER_COOKIE_NAME);
         assertThat(codeVerifierCookies, hasSize(1));
@@ -175,6 +187,15 @@ public class PkceLoginRestControllerIT {
         assertThat(queryParams.get("code_challenge"), is(equalTo(CODE_CHALLENGE)));
         assertThat(queryParams.get("nonce"), is(equalTo(NONCE)));
         assertThat(queryParams.get("state"), is(equalTo(STATE)));
+
+        List<HttpCookie> nonceCookies = responseCookies.get(TokenConstants.NONCE_COOKIE_NAME);
+        assertThat(nonceCookies, hasSize(1));
+
+        HttpCookie nonceCookie = nonceCookies.get(0);
+        assertThat(nonceCookie.getName(), is(equalTo(TokenConstants.NONCE_COOKIE_NAME)));
+        assertThat(nonceCookie.getPath(), is(equalTo("/oauth2/token")));
+        assertThat(nonceCookie.getMaxAge(), is(equalTo(3600L)));
+        assertThat(nonceCookie.getValue(), is(equalTo(NONCE)));
     }
 
     @Test
@@ -195,7 +216,7 @@ public class PkceLoginRestControllerIT {
         assertThat(redirectLocation.getPath(), is(equalTo("/auth/realms/moped/protocol/openid-connect/auth")));
 
         MultiValueMap<String, HttpCookie> responseCookies = UriCookieUtils.parseCookiesAsMap(responseHeaders);
-        assertThat(responseCookies.size(), is(equalTo(2)));
+        assertThat(responseCookies.size(), is(equalTo(3)));
 
         List<HttpCookie> codeVerifierCookies = responseCookies.get(TokenConstants.CODE_VERIFIER_COOKIE_NAME);
         assertThat(codeVerifierCookies, hasSize(1));
@@ -232,6 +253,16 @@ public class PkceLoginRestControllerIT {
         assertThat(queryParams.get("code_challenge"), is(equalTo(CODE_CHALLENGE)));
         assertThat(queryParams.get("nonce"), is(equalTo(NONCE)));
         assertThat(queryParams.get("state"), is(equalTo(STATE)));
+
+
+        List<HttpCookie> nonceCookies = responseCookies.get(TokenConstants.NONCE_COOKIE_NAME);
+        assertThat(nonceCookies, hasSize(1));
+
+        HttpCookie nonceCookie = nonceCookies.get(0);
+        assertThat(nonceCookie.getName(), is(equalTo(TokenConstants.NONCE_COOKIE_NAME)));
+        assertThat(nonceCookie.getPath(), is(equalTo("/oauth2/token")));
+        assertThat(nonceCookie.getMaxAge(), is(equalTo(3600L)));
+        assertThat(nonceCookie.getValue(), is(equalTo(NONCE)));
     }
 
     @Test

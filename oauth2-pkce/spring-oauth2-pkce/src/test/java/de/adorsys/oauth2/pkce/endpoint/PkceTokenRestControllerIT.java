@@ -47,8 +47,9 @@ public class PkceTokenRestControllerIT {
     private static final String AGENT_STATE_BASE64 = Base64.encode(AGENT_STATE_VALUE.getBytes());
     private static final String CODE = "my_custom_code";
     private static final String CODE_VERIFIER = "my_custom_code_verifier";
-    private static final String ACCESS_TOKEN = "my_custom_access_token";
+    private static final String ACCESS_TOKEN_WITH_NONCE = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICItcjZTeHhSN0tzSm1xeXVZMGV2TlhfRlpqQ25pNURkZHl4a1B5SmVEaEdFIn0.eyJqdGkiOiI5ZjZiNDhmZC05MDI5LTQ0YTgtOGJiMS1hNTA4NWYxZTc2MTIiLCJleHAiOjE1NTgzMzU0MjAsIm5iZiI6MCwiaWF0IjoxNTU4MzM1MTIwLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbW9wZWQiLCJzdWIiOiJiZDk2NzQwMy02MjE3LTQ4N2YtYTUwYi1mNzhhN2E4Y2RhZjYiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJtb3BlZC1jbGllbnQiLCJub25jZSI6IjRYTFJiNGg1VllCZGFDWldJS2xfWGhka3JDWSIsImF1dGhfdGltZSI6MTU1ODMzNTEyMCwic2Vzc2lvbl9zdGF0ZSI6ImFmY2JmMGFjLTU2OWUtNDk5Zi1iZWQ5LTkwMDVmMTJhMmI4OSIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiKiJdLCJzY29wZSI6Im9wZW5pZCBlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoibXkgZmlyc3RuYW1lIG15IGxhc3RuYW1lIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXl1c2VyIiwiZ2l2ZW5fbmFtZSI6Im15IGZpcnN0bmFtZSIsImZhbWlseV9uYW1lIjoibXkgbGFzdG5hbWUiLCJlbWFpbCI6Im15QG1haWwuZGUifQ.O9poOo7qmPZg9ixSyICsQmIwxu0CTDWK0GLBO6Z2AFEjDXVLEBLRcD3K6VN-gIUCcEHE932epTbosj8ZXQyd8gvDB9yb9_qaJ-UHzPF7jN_g4jSJY9ftaJIbk1LAG26I105onifO_uI9OcbDkZN64mChrRH4sIgqvJVRLwvKHiyPEh8mwplx_yVtfZ-SqKIriPYOy4aD4f1yiQ0xpVFK9GPtsV5hjnh3im7uQwsqYYtr433uC-VgQfpNaCjs1zs9COe30tAzyNYL4PxrhxlLg9jt1KMO0hC38wNXbVS7UYYHNWvQqjHvGoBojs6uWLn7IUvyJpqSq2uVKjlvpFcOF25EGOzvPzvYQ5GHBfqU64Y6DYc3bO9k8N49szEUS5-aOL2AtpNdETfxJECnJO3xoKtecC5xc0A8f4pjdm1T1SBbnExvcoseM3PJmL-bqfCen1K8oK1mrtCVS3JOtD7LB1mJMpGL4mFXQd9_4J4ECjGXNrLFqcgo8S1ykgwzkqKG2WEq551RnXW5x-vDmVA6k5bnoyxD1pEFxLR8xBnBnhxMpoMCzGZ9imHzWL0k78ITK1aoBdohwrVWUQygIOgHm6CrmbkfJVP7dXnd-6Lcg2WPP3smGLOIbUrbdejRrf3BtB2OWKpYk9IakcNmxqT35e-78-RrHfZ9K7vPblZ8YTg";
     private static final String REFRESH_TOKEN = "my_custom_refresh_token";
+    private static final String NONCE = "4XLRb4h5VYBdaCZWIKl_XhdkrCY";
     private static final long ACCESS_TOKEN_EXPIRE_IN = 1234567L;
     private static final long REFRESH_TOKEN_EXPIRE_IN = 563246323L;
     private static final String REDIRECT_URI = "http://my-custom-redirect-uri";
@@ -69,7 +70,7 @@ public class PkceTokenRestControllerIT {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        when(tokenResponse.getAccess_token()).thenReturn(ACCESS_TOKEN);
+        when(tokenResponse.getAccess_token()).thenReturn(ACCESS_TOKEN_WITH_NONCE);
         when(tokenResponse.getExpires_in()).thenReturn(ACCESS_TOKEN_EXPIRE_IN);
         when(tokenResponse.getRefresh_token()).thenReturn(REFRESH_TOKEN);
         when(tokenResponse.anyRefreshTokenExpireIn()).thenReturn(REFRESH_TOKEN_EXPIRE_IN);
@@ -78,10 +79,23 @@ public class PkceTokenRestControllerIT {
     }
 
     @Test
-    public void shouldRespondWith302WhenRequestTokenWithCode() {
+    public void shouldRespondWith400WhenRequestTokenWithCodeButWithoutNonce() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
         headers.add("Cookie", "user_agent_state=" + AGENT_STATE_BASE64);
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+
+        ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?code=" + CODE, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void shouldRespondWith302WhenRequestTokenWithCodeAndNonce() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
+        headers.add("Cookie", "user_agent_state=" + AGENT_STATE_BASE64);
+        headers.add("Cookie", "nonce=" + NONCE);
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 
         ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?code=" + CODE, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
@@ -93,13 +107,13 @@ public class PkceTokenRestControllerIT {
         assertThat(redirectLocation.toString(), is(equalTo("http://my-custom-user-agent-page")));
 
         MultiValueMap<String, HttpCookie> responseCookies = UriCookieUtils.parseCookiesAsMap(responseHeaders);
-        assertThat(responseCookies.size(), is(equalTo(4)));
+        assertThat(responseCookies.size(), is(equalTo(5)));
 
         List<HttpCookie> accessTokenCookies = responseCookies.get("access_token");
         assertThat(accessTokenCookies, hasSize(1));
 
         HttpCookie accessTokenCookie = accessTokenCookies.get(0);
-        assertThat(accessTokenCookie.getValue(), is(equalTo(ACCESS_TOKEN)));
+        assertThat(accessTokenCookie.getValue(), is(equalTo(ACCESS_TOKEN_WITH_NONCE)));
         assertThat(accessTokenCookie.getPath(), is(equalTo("/")));
         assertThat(accessTokenCookie.getMaxAge(), is(equalTo(ACCESS_TOKEN_EXPIRE_IN)));
 
@@ -126,12 +140,46 @@ public class PkceTokenRestControllerIT {
         assertThat(userAgentStateCookie.getValue(), is(equalTo("")));
         assertThat(userAgentStateCookie.getPath(), is(equalTo("/oauth2/token")));
         assertThat(userAgentStateCookie.getMaxAge(), is(equalTo(0L)));
+
+        List<HttpCookie> nonceCookies = responseCookies.get("nonce");
+        assertThat(nonceCookies, hasSize(1));
+
+        HttpCookie nonceCookie = nonceCookies.get(0);
+        assertThat(nonceCookie.getValue(), is(equalTo("")));
+        assertThat(nonceCookie.getPath(), is(equalTo("/oauth2/token")));
+        assertThat(nonceCookie.getMaxAge(), is(equalTo(0L)));
     }
 
     @Test
-    public void shouldRespondWith302WhenRequestTokenWithCodeAndRedirectUri() {
+    public void shouldRespondWith400WhenRequestTokenWithCodeButWithWrongNonce() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
+        headers.add("Cookie", "user_agent_state=" + AGENT_STATE_BASE64);
+        headers.add("Cookie", "nonce=" + "other_nonce_than_in_token");
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+
+        ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?code=" + CODE, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void shouldRespondWith400WhenRequestTokenWithCodeAndRedirectUriButWithoutNonce() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+
+        ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?code=" + CODE + "&redirect_uri=" + REDIRECT_URI, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void shouldRespondWith302WhenRequestTokenWithCodeAndRedirectUriAndNonce() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
+        headers.add("Cookie", "nonce=" + NONCE);
+
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 
         ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?code=" + CODE + "&redirect_uri=" + REDIRECT_URI, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
@@ -143,13 +191,13 @@ public class PkceTokenRestControllerIT {
         assertThat(redirectLocation.toString(), is(equalTo(REDIRECT_URI)));
 
         MultiValueMap<String, HttpCookie> responseCookies = UriCookieUtils.parseCookiesAsMap(responseHeaders);
-        assertThat(responseCookies.size(), is(equalTo(4)));
+        assertThat(responseCookies.size(), is(equalTo(5)));
 
         List<HttpCookie> accessTokenCookies = responseCookies.get("access_token");
         assertThat(accessTokenCookies, hasSize(1));
 
         HttpCookie accessTokenCookie = accessTokenCookies.get(0);
-        assertThat(accessTokenCookie.getValue(), is(equalTo(ACCESS_TOKEN)));
+        assertThat(accessTokenCookie.getValue(), is(equalTo(ACCESS_TOKEN_WITH_NONCE)));
         assertThat(accessTokenCookie.getPath(), is(equalTo("/")));
         assertThat(accessTokenCookie.getMaxAge(), is(equalTo(ACCESS_TOKEN_EXPIRE_IN)));
 
@@ -176,6 +224,27 @@ public class PkceTokenRestControllerIT {
         assertThat(userAgentStateCookie.getValue(), is(equalTo("")));
         assertThat(userAgentStateCookie.getPath(), is(equalTo("/oauth2/token")));
         assertThat(userAgentStateCookie.getMaxAge(), is(equalTo(0L)));
+
+        List<HttpCookie> nonceCookies = responseCookies.get("nonce");
+        assertThat(nonceCookies, hasSize(1));
+
+        HttpCookie nonceCookie = nonceCookies.get(0);
+        assertThat(nonceCookie.getValue(), is(equalTo("")));
+        assertThat(nonceCookie.getPath(), is(equalTo("/oauth2/token")));
+        assertThat(nonceCookie.getMaxAge(), is(equalTo(0L)));
+    }
+
+    @Test
+    public void shouldRespondWith302WhenRequestTokenWithCodeAndRedirectUriButWithWrongNonce() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "code_verifier=" + CODE_VERIFIER);
+        headers.add("Cookie", "nonce=" + "other_nonce_than_in_token");
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+
+        ResponseEntity<String> response = restTemplate.exchange("/oauth2/token?code=" + CODE + "&redirect_uri=" + REDIRECT_URI, HttpMethod.GET, new HttpEntity<>(body, headers), String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 
     @Test

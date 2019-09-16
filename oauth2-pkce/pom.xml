@@ -48,8 +48,7 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<spring-boot.version>2.0.1.RELEASE</spring-boot.version>
-		<de.adorsys.crypt.version>0.21.2</de.adorsys.crypt.version>
-		<de.adorsys.sts.version>0.27.2</de.adorsys.sts.version>
+		<de.adorsys.sts.version>0.29.3</de.adorsys.sts.version>
 		<scmBranch />
 		<buildNumber />
 	</properties>
@@ -68,12 +67,6 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-
-			<dependency>
-				<groupId>de.adorsys.cryptoutils</groupId>
-				<artifactId>basetypes</artifactId>
-				<version>${de.adorsys.crypt.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>de.adorsys.cryptoutils</groupId>
 				<artifactId>encobject</artifactId>
@@ -89,6 +82,17 @@
 				<groupId>de.adorsys.sts</groupId>
 				<artifactId>sts-spring</artifactId>
 				<version>${de.adorsys.sts.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>de.adorsys.sts</groupId>
+				<artifactId>sts-crypto-utils</artifactId>
+				<version>${de.adorsys.sts.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.nimbusds</groupId>
+				<artifactId>nimbus-jose-jwt</artifactId>
+				<version>7.1</version>
 			</dependency>
 
 			<dependency>
@@ -110,6 +114,13 @@
 		<finalName>${project.artifactId}</finalName>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<!--https://stackoverflow.com/questions/49363222/maven-failsafe-plugin-surefirebooterforkexception-there-was-an-error-in-the-f-->
+					<version>2.18.1</version>
+				</plugin>
+
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-project-info-reports-plugin</artifactId>
@@ -188,7 +199,7 @@
 					<artifactId>lombok-maven-plugin</artifactId>
 					<version>1.16.18.1</version>
 				</plugin>
-				
+
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
@@ -209,7 +220,6 @@
 						<classifier>executable</classifier>
 					</configuration>
 				</plugin>
-				
 			</plugins>
 		</pluginManagement>
 	</build>

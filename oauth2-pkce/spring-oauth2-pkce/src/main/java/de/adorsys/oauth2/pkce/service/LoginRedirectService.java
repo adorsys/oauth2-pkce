@@ -46,6 +46,7 @@ public class LoginRedirectService {
         LoginRedirect loginRedirect = new LoginRedirect();
         loginRedirect.setCodeVerifier(codeVerifier);
         loginRedirect.setRedirectUrl(builder.toUriString());
+        loginRedirect.setGeneratedNonce(nonce);
 
         return loginRedirect;
     }
@@ -53,12 +54,13 @@ public class LoginRedirectService {
     public static class LoginRedirect {
         private CodeVerifier codeVerifier;
         private String redirectUrl;
+        private Nonce generatedNonce;
 
         public CodeVerifier getCodeVerifier() {
             return codeVerifier;
         }
 
-        public void setCodeVerifier(CodeVerifier codeVerifier) {
+        void setCodeVerifier(CodeVerifier codeVerifier) {
             this.codeVerifier = codeVerifier;
         }
 
@@ -66,8 +68,16 @@ public class LoginRedirectService {
             return redirectUrl;
         }
 
-        public void setRedirectUrl(String redirectUrl) {
+        void setRedirectUrl(String redirectUrl) {
             this.redirectUrl = redirectUrl;
+        }
+
+        public Nonce getGeneratedNonce() {
+            return generatedNonce;
+        }
+
+        void setGeneratedNonce(Nonce generatedNonce) {
+            this.generatedNonce = generatedNonce;
         }
     }
 }
