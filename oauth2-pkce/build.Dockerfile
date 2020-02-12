@@ -1,4 +1,4 @@
-FROM adorsys/openjdk-build-base:8
+FROM adorsys/java:8
 
 RUN mkdir -p /opt/src
 WORKDIR /opt/src
